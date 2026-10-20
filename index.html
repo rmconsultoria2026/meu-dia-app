@@ -78,7 +78,8 @@ details{background:var(--card);border-radius:16px;padding:10px 14px;margin:8px 0
 .clock{font-size:64px;font-weight:800;text-align:center;letter-spacing:2px}
 .slots{display:flex;gap:8px;font-size:28px}.slots span{opacity:.25}.slots span.on{opacity:1}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
-.agav svg{width:64px;height:64px;display:block}.bubble{background:var(--soft);border-radius:14px;padding:8px 10px;margin-top:4px;font-weight:700}.avgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}.avgrid button{border:3px solid transparent;border-radius:16px;background:#fff;padding:6px;font-size:12px;color:var(--ink)}.avgrid button.on{border-color:var(--pri)}.avgrid svg{width:64px;height:64px}</style>
+.agav svg{width:64px;height:64px;display:block}.bubble{background:var(--soft);border-radius:14px;padding:8px 10px;margin-top:4px;font-weight:700}.avgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}.avgrid button{border:3px solid transparent;border-radius:16px;background:#fff;padding:6px;font-size:12px;color:var(--ink)}.avgrid button.on{border-color:var(--pri)}.avgrid svg{width:64px;height:64px}.noread .muted{display:none}.noread .ic{font-size:56px;width:80px;height:80px}.noread .nm{font-size:20px}.noread .steptxt{font-size:20px}
+</style>
 </head>
 <body>
 <div id="app"></div>
@@ -106,7 +107,7 @@ let S={view:'kid',kid:'home',pTab:'hoje',step:0,cur:null,said:'',balance:3,check
  week:{gift:'🍨',name:'Sorvete ou açaí',done:3,total:9,counted:false},
  month:{gift:'🎬',name:'Cinema',weeks:4,done:1},
  play:{ready:30,running:false,ended:false,left:0,total:0,warned:{}},
- cfg:{play:{min:30,warn5:true,warn1:true,sound:true,vol:0.15,demo:false},narr:true,rate:0.9,arrows:true,outline:true,still:false,fadeLast:false,cur:0,dlg:{g:'passo',rotina:'',casa:'',escola:''},auto:{rotina:1,casa:1,escola:1,tela:0,comunicacao:2},jar:'star',jarKid:true,useVoz:true,pin:'',agent:{on:true,name:'',av:'vagalume',kidPick:true,levels:{1:true,2:true,3:true}},nick:'',check:{on:false,times:['15:30']}},
+ cfg:{play:{min:30,warn5:true,warn1:true,sound:true,vol:0.15,demo:false},narr:true,rate:0.9,arrows:true,outline:true,still:false,fadeLast:false,cur:0,dlg:{g:'passo',rotina:'',casa:'',escola:''},auto:{rotina:1,casa:1,escola:1,tela:0,comunicacao:2},jar:'star',jarKid:true,useVoz:true,pin:'',agent:{on:true,name:'',av:'vagalume',kidPick:true,levels:{1:true,2:true,3:true}},nick:'',check:{on:false,times:['15:30']},prof:{done:false,ans:{},when:''},read:'frases',mem:'good',chal:'ok',canal:[],mods:{rotina:true,casa:true,escola:true,talk:true,store:true,calm:true,play:true}},
  tasks:[
   {id:7,icon:'🎒',name:'Arrumar-se para a escola',area:'escola',time:'06:45',block:false,reward:1,state:'todo',steps:[{icon:'👕',text:'Vestir o uniforme'},{icon:'🎒',text:'Conferir a mochila'},{icon:'🥪',text:'Pegar o lanche'},{icon:'💧',text:'Pegar a garrafa de água'}]},
   {id:2,icon:'🪥',name:'Escovar os dentes',area:'rotina',time:'07:15',block:true,reward:1,state:'todo',steps:[{icon:'🪥',text:'Pegar a escova'},{icon:'🧴',text:'Colocar um pouquinho de pasta'},{icon:'😁',text:'Escovar por dois minutos'},{icon:'🚰',text:'Enxaguar a boca'}]},
@@ -127,7 +128,7 @@ let S={view:'kid',kid:'home',pTab:'hoje',step:0,cur:null,said:'',balance:3,check
 const talk=[['💧','Quero beber água'],['🍎','Estou com fome'],['🚻','Preciso ir ao banheiro'],['🆘','Preciso de ajuda'],['😴','Quero descansar'],['📱','Quero o celular'],['🤗','Quero um abraço'],['🔊','Está muito barulho']];
 
 function speak(t){if(!('speechSynthesis' in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='pt-BR';u.rate=S.cfg.rate;speechSynthesis.speak(u);}
-function say(t,force,key){if(!t||(!S.cfg.narr&&!force))return;if(key&&S.cfg.useVoz!==false&&playVoz(key,t))return;speak(t);}
+function say(t,force,key){if(!t||(!narrOn()&&!force))return;if(key&&S.cfg.useVoz!==false&&playVoz(key,t))return;speak(t);}
 function fmt(n){const c=S.cfg.cur;if(c==0)return n+' '+JT().e;if(c==1)return (n*10)+' pontos';if(c==2)return n+' 🪙';return 'R$ '+(n*0.5).toFixed(2).replace('.',',');}
 function fmtSay(n){const c=S.cfg.cur;if(c==0)return n+' '+(n==1?JT().one:JT().many);if(c==1)return (n*10)+' pontos';if(c==2)return n+(n==1?' moeda':' moedas');return (n*0.5).toFixed(2).replace('.',',')+' reais';}
 const T=id=>S.tasks.find(t=>t.id===id);
@@ -164,11 +165,11 @@ function setPlay(k,v){S.cfg.play[k]=v;render();}
 
 function setView(v){if(v==='kid')S.unl=false;if(v==='par'&&!S.unl){v='pin';}S.view=v;S.kid='home';S.alarm=null;if('speechSynthesis' in window)speechSynthesis.cancel();render();window.scrollTo(0,0);}
 function go(k){S.kid=k;S.said='';S.alarm=null;render();window.scrollTo(0,0);if(k==='calm')say('Vamos respirar. Puxe o ar devagar. Agora solte, bem devagar.');}
-function startTask(id){const t=T(id);if(!t||t.state!=='todo')return;S.alarm=null;S.cur=id;S.step=0;S.kid='task';render();say((prof(t.area)==='passo'?'Vamos começar: '+t.name+'. ':'')+stepSay(t));}
-function next(){const t=T(S.cur);if(S.step<t.steps.length-1){S.step++;render();say(stepSay(t));}else finish();}
+function startTask(id){const t=T(id);if(!t||t.state!=='todo')return;S.alarm=null;S.cur=id;S.step=0;S.kid='task';render();sayStart(t);}
+function next(){const t=T(S.cur);if(S.step<t.steps.length-1){S.step++;render();say(stepSay(t),false,vk(t.id,S.step));}else finish();}
 function finish(){const t=T(S.cur);if(t.proof&&t.proof!=='none'&&!S.proofOk){S.kid='proof';S.proofMsg='';render();say(proofSay(t));return;}S.proofOk=false;finishNow();}
 function finishNow(){const t=T(S.cur);const auto=S.cfg.auto[t.area]>=3;if(auto){t.state='done';S.balance+=t.reward;bump();}else{t.state='wait';S.pending.push({type:'tarefa',id:t.id});}if(S.lock===t.id)S.lock=null;S.kid='done';render();say(doneSay(t,auto));}
-function trigger(id){const t=T(id);if(!t||t.state!=='todo')return;S.view='kid';S.kid='alarm';S.alarm=id;if(t.block)S.lock=id;render();window.scrollTo(0,0);say(alarmSay(t));}
+function trigger(id){const t=T(id);if(!t||t.state!=='todo')return;S.view='kid';S.kid='alarm';S.alarm=id;if(t.block)S.lock=id;render();window.scrollTo(0,0);say(alarmSay(t),false,'tk'+t.id);}
 function snooze(){const t=T(S.alarm);S.alarm=null;S.kid='home';render();say(t&&prof(t.area)==='passo'?'Tudo bem. Eu aviso de novo daqui a cinco minutos.':'');}
 function redeem(id){const r=S.rewards.find(x=>x.id===id);if(S.balance<r.cost)return;S.balance-=r.cost;if(r.tela&&S.cfg.auto.tela>=3){S.said='Liberado! Aproveite 📺';}else{S.pending.push({type:'troca',id:r.id});S.said='Pedido enviado aos pais 💛';}render();say(S.said.replace(/[^\p{L}\p{N}\s!,.]/gu,''));}
 function speakPhrase(p){S.said=p;render();say(p,true);}
@@ -188,11 +189,11 @@ function sugg(id,ok){const s=S.sugg.find(x=>x.id===id);s.s=ok?'aceita':'depois';
 function resetDay(){S.play={ready:S.cfg.play.min,running:false,ended:false,left:0,total:0,warned:{}};S.tasks.forEach(t=>t.state='todo');S.pending=S.pending.filter(p=>p.type!=='tarefa');S.lock=null;S.fired={};render();}
 function resetWeek(){S.week.done=0;S.week.counted=false;render();}
 
-function topbar(){return `<div class="top"><button class="${S.view==='kid'?'on':''}" onclick="setView('kid')">👧 Visão dela</button><button class="${S.view==='par'?'on':''}" onclick="setView('par')">👨‍👩‍👧 Pais e responsáveis</button></div><div class="ribbon">Laboratório v0.7 · ${N.mode==='kid'?'pareado com a família':N.mode==='parent'?'conta da família ligada':'salvo só neste aparelho'} · a IA aqui é simulada</div>`;}
+function topbar(){return `<div class="top"><button class="${S.view==='kid'?'on':''}" onclick="setView('kid')">👧 Visão dela</button><button class="${S.view==='par'?'on':''}" onclick="setView('par')">👨‍👩‍👧 Pais e responsáveis</button></div><div class="ribbon">Laboratório v0.8 · ${N.mode==='kid'?'pareado com a família':N.mode==='parent'?'conta da família ligada':'salvo só neste aparelho'} · a IA aqui é simulada</div>`;}
 
-function kidNav(){const n=[['home','🏠','Meu dia'],['casa','🧹','Casa'],['escola','🎒','Escola'],['talk','💬','Falar'],['store','🎁','Loja'],['calm','🌿','Calma']];return `<div class="nav">${n.map(x=>`<button class="${S.kid===x[0]?'on':''}" onclick="go('${x[0]}')"><span>${x[1]}</span>${x[2]}</button>`).join('')}</div>`;}
+function kidNav(){const n=[['home','🏠','Meu dia'],['casa','🧹','Casa'],['escola','🎒','Escola'],['talk','💬','Falar'],['store','🎁','Loja'],['calm','🌿','Calma']].filter(function(x){return x[0]==='home'||modOn(x[0]);});return `<div class="nav">${n.map(x=>`<button class="${S.kid===x[0]?'on':''}" onclick="go('${x[0]}')"><span>${x[1]}</span>${x[2]}</button>`).join('')}</div>`;}
 
-function taskCard(t){return `<div class="task ${t.state}" onclick="startTask(${t.id})"><div class="ic">${esc(t.icon)}</div><div class="grow"><div class="nm">${esc(t.name)}</div>${t.time?`<span class="chip">⏰ ${esc(t.time)}</span>`:''}<span class="tag ${t.state}">${t.state==='todo'?'▶ Vamos! +'+fmt(t.reward):t.state==='wait'?'⏳ Os pais vão ver':'✓ Feito'}</span></div><button class="spk" onclick="event.stopPropagation();say(${q(t.name)},1)">🔊</button></div>`;}
+function taskCard(t){return `<div class="task ${t.state}" onclick="startTask(${t.id})"><div class="ic">${esc(t.icon)}</div><div class="grow"><div class="nm">${esc(t.name)}</div>${t.time?`<span class="chip">⏰ ${esc(t.time)}</span>`:''}<span class="tag ${t.state}">${t.state==='todo'?'▶ Vamos! +'+fmt(t.reward):t.state==='wait'?'⏳ Os pais vão ver':'✓ Feito'}</span></div><button class="spk" onclick="event.stopPropagation();say(${q(t.name)},1,'tk${t.id}')">🔊</button></div>`;}
 
 function lockBanner(){if(!S.lock)return '';const t=T(S.lock);return `<div class="lockbox"><div class="pair"><div class="b">${esc(t.icon)}<small>Primeiro</small></div><div class="ar">➜</div><div class="b">📱<small>Depois</small></div></div><p style="text-align:center;font-weight:700;margin:6px 0 0">A tela de lazer volta quando você terminar: ${esc(t.name)}</p></div>`;}
 
@@ -213,14 +214,14 @@ function kidPlay(){const p=S.play;const pct=p.total?Math.round(p.left/p.total*10
  if(p.running)return `<div class="pad" style="text-align:center"><div style="font-size:70px;margin-top:10px">🌳</div><h1>Hora de brincar lá fora</h1><div class="clock">${mmss(p.left)}</div><div class="bar"><i style="width:${pct}%"></i></div><p class="muted">Pode guardar o celular no bolso. Eu aviso com um sonzinho antes de acabar.</p><button class="btn sec" onclick="stopPlay()">Terminar agora</button></div>`;
  return `<div class="pad" style="text-align:center"><div style="font-size:70px;margin-top:20px">🌳</div><h1>Sem tempo de brincar agora</h1><p class="muted">Os pais liberam o próximo tempo de brincar.</p><button class="btn" onclick="go('home')">Voltar ao meu dia</button></div>`;}
 
-function kidHome(){const open=S.tasks.filter(t=>t.state==='todo').length;const stars=Math.min(S.balance,12);const pct=Math.min(S.balance/10,1)*100;
+function kidHome(){const open=visTasks().filter(t=>t.state==='todo').length;const stars=Math.min(S.balance,12);const pct=Math.min(S.balance/10,1)*100;
  const greet='Bom dia! Hoje temos '+open+(open==1?' coisa':' coisas')+' para fazer. Você já tem '+fmtSay(S.balance)+'.';
  return `<div class="pad"><div class="row"><h1 class="grow">Bom dia! ☀️</h1><button class="spk" onclick="say(${q(greet)},1)">🔊</button></div>
  ${lockBanner()}
- ${S.cfg.agent.on?agentBar(agGreet(open),'ok'):''}
+ ${dayBtn()}${S.cfg.agent.on?agentBar(agGreet(open),'ok'):''}
  <div class="card jar"><div class="jarbox"><div class="jarfill" style="height:${pct}%"></div><div class="jarstars">${JT().e.repeat(stars)}</div></div><div><h3>Meu pote</h3><div style="font-size:26px;font-weight:800">${fmt(S.balance)}</div><p class="muted">Faça as atividades para encher o pote.</p>${S.cfg.jarKid?`<button class="btn sec small" style="width:auto" onclick="nextJar()">${JT().e} Trocar o pote</button>`:''}</div></div>
  ${puz()}
- ${monthCard()}${playCard()}<h2>O que vamos fazer hoje</h2>${sortT(S.tasks).map(taskCard).join('')}</div>`;}
+ ${monthCard()}${modOn('play')?playCard():''}<h2>O que vamos fazer hoje</h2>${sortT(visTasks()).map(taskCard).join('')}</div>`;}
 
 function kidArea(area,title,intro){const l=sortT(S.tasks.filter(t=>t.area===area));
  return `<div class="pad"><div class="row"><h1 class="grow">${title}</h1><button class="spk" onclick="say(${q(intro)},1)">🔊</button></div>${lockBanner()}
@@ -230,12 +231,12 @@ function kidArea(area,title,intro){const l=sortT(S.tasks.filter(t=>t.area===area
 function kidTask(){const t=T(S.cur),st=t.steps[S.step],last=S.step===t.steps.length-1;const showArrow=S.cfg.arrows&&!(S.cfg.fadeLast&&last);const p=prof(t.area);
  return `<div class="pad"><div class="row"><button class="spk" onclick="go('home')">⬅️</button><div class="grow dots">${t.steps.map((_,i)=>`<i class="${i<S.step?'on':i===S.step?'cur':''}"></i>`).join('')}</div></div>
  ${p==='passo'?`<div class="muted" style="text-align:center;font-weight:700">Passo ${S.step+1} de ${t.steps.length}</div>`:''}
- <div class="stage"><div class="big ${S.cfg.outline?'ring':''}">${esc(st.icon)}</div><div class="steptxt">${esc(st.text)}</div><div style="margin-top:14px"><button class="spk" style="width:60px;height:60px;font-size:28px" onclick="say(${q(st.text)},1)">🔊</button></div></div>
+ <div class="stage"><div class="big ${S.cfg.outline?'ring':''}">${esc(st.icon)}</div><div class="steptxt">${esc(st.text)}</div><div style="margin-top:14px"><button class="spk" style="width:60px;height:60px;font-size:28px" onclick="say(${q(st.text)},1,'${vk(t.id,S.step)}')">🔊</button></div></div>
  ${showArrow?'<div class="arrow">⬇️</div>':'<div style="height:52px"></div>'}
  <button class="btn ${last?'ok':''}" onclick="next()">${last?'Concluí! ✅':'Próximo ➜'}</button></div>`;}
 
 function kidAlarm(){const t=T(S.alarm);if(!t)return kidHome();
- return `<div class="pad alarm"><div style="font-size:30px;margin-top:10px">⏰ ${esc(t.time||'')}</div><div class="stage"><div class="big ${S.cfg.outline?'ring':''}">${esc(t.icon)}</div><h1>Hora de ${esc(t.name.toLowerCase())}</h1><div style="margin-top:12px"><button class="spk" style="width:60px;height:60px;font-size:28px" onclick="say(${q(alarmSay(t))},1)">🔊</button></div></div>
+ return `<div class="pad alarm"><div style="font-size:30px;margin-top:10px">⏰ ${esc(t.time||'')}</div><div class="stage"><div class="big ${S.cfg.outline?'ring':''}">${esc(t.icon)}</div><h1>Hora de ${esc(t.name.toLowerCase())}</h1><div style="margin-top:12px"><button class="spk" style="width:60px;height:60px;font-size:28px" onclick="say(${q(alarmSay(t))},1,'tk${t.id}')">🔊</button></div></div>
  ${t.block?`<div class="lockbox"><div class="pair"><div class="b">${esc(t.icon)}<small>Primeiro</small></div><div class="ar">➜</div><div class="b">📱<small>Depois</small></div></div></div>`:''}
  <button class="btn" onclick="startTask(${t.id})">Vamos! ▶</button>
  <div class="row" style="margin-top:10px"><button class="btn sec small grow" onclick="snooze()">Daqui a 5 minutos</button><button class="btn sec small grow" onclick="go('talk')">💬 Quero falar</button></div></div>`;}
@@ -251,12 +252,12 @@ function kidTalk(){return `<div class="pad"><h1>Quero falar 💬</h1><p class="m
 
 function kidCalm(){return `<div class="pad" style="text-align:center"><h1>Calma 🌿</h1>${S.cfg.agent.on?agentBar('Estou aqui com você. Vamos respirar juntos.','calm'):''}<p style="font-size:20px">Puxe o ar devagar... e solte.</p><div class="breath">🌿</div><button class="btn sec" onclick="go('home')">Voltar</button></div>`;}
 
-function kidView(){const m={home:kidHome,casa:()=>kidArea('casa','Casa 🏠','Aqui estão as atividades de casa.'),escola:()=>kidArea('escola','Escola 🎒','Aqui estão os avisos e as atividades da escola.'),task:kidTask,alarm:kidAlarm,done:kidDone,store:kidStore,talk:kidTalk,calm:kidCalm,play:kidPlay,avatar:kidAvatar,proof:kidProof,checkin:kidCheckin};return m[S.kid]()+(['task','done','alarm','proof','checkin','avatar'].includes(S.kid)?'':kidNav());}
+function kidView(){const m={home:kidHome,casa:()=>kidArea('casa','Casa 🏠','Aqui estão as atividades de casa.'),escola:()=>kidArea('escola','Escola 🎒','Aqui estão os avisos e as atividades da escola.'),task:kidTask,alarm:kidAlarm,done:kidDone,store:kidStore,talk:kidTalk,calm:kidCalm,play:kidPlay,avatar:kidAvatar,proof:kidProof,checkin:kidCheckin};if(S.kid!=='home'&&MODS.some(function(x){return x[0]===S.kid;})&&!modOn(S.kid))S.kid='home';return m[S.kid]()+(['task','done','alarm','proof','checkin','avatar'].includes(S.kid)?'':kidNav());}
 
 function parTabs(){const n=[['hoje','📋','Hoje']];if(N.mode==='parent')n.push(['remoto','📡','Remoto']);n.push(['ajustes','⚙️','Ajustes'],['agente','🤖','Agente'],['conta','🔗','Conta']);return `<div class="nav">${n.map(x=>`<button class="${S.pTab===x[0]?'on':''}" onclick="S.pTab='${x[0]}';render();window.scrollTo(0,0)"><span>${x[1]}</span>${x[2]}</button>`).join('')}</div>`;}
 
 function parHoje(){const done=S.tasks.filter(t=>t.state==='done').length;
- return `<div class="pad"><h1>Painel dos pais</h1>
+ return `<div class="pad"><h1>Painel dos pais</h1>${profBanner()}
  <div class="stat"><div class="card"><b>${done}/${S.tasks.length}</b><span class="muted">feitas hoje</span></div><div class="card"><b>${fmt(S.balance)}</b><span class="muted">no pote</span></div></div>
  ${S.lock?`<div class="lockbox"><b>📱 Tela de lazer em pausa</b> até ela concluir "${esc(T(S.lock).name)}".<p><button class="btn sec small" onclick="S.lock=null;render()">Liberar a tela agora</button></p></div>`:''}
  <h2>Aguardando vocês ${S.pending.length?'('+S.pending.length+')':''}</h2>
@@ -272,7 +273,7 @@ function dlgSel(k){const v=S.cfg.dlg[k];return `<select onchange="setDlg('${k}',
 
 function parAjustes(){const c=S.cfg;
  const sw=(k,l)=>`<label class="sw">${l}<input type="checkbox" ${c[k]?'checked':''} onchange="setCfg('${k}',this.checked)"></label>`;
- return `<div class="pad"><h1>Ajustes</h1><p class="muted">Tudo aqui é editável e muda a visão dela na hora.</p>
+ return `<div class="pad"><h1>Ajustes</h1><p class="muted">Tudo aqui é editável e muda a visão dela na hora.</p>${perfCard()}${modCard()}
  <h2>Perfil de diálogo</h2><div class="card"><p class="muted">Como o app conversa com ela. Vale para todos os módulos, e cada um pode ter o seu.</p>
  <div class="seg">${Object.keys(DLG).map(x=>`<button class="${c.dlg.g===x?'on':''}" onclick="setDlg('g','${x}')">${DLG[x]}</button>`).join('')}</div>
  <p class="muted">${DLGD[c.dlg.g]}</p>
@@ -304,6 +305,7 @@ function parAjustes(){const c=S.cfg;
  <p class="muted">Recompensa (em estrelas-base)</p><input type="number" min="0" value="${t.reward}" onchange="upd(${t.id},'reward',this.value)">
  <p class="muted">Prova do que ela fez (aparece para vocês antes de aprovar)</p><select onchange="upd(${t.id},'proof',this.value)">${[['none','Sem prova'],['foto','Foto'],['video','Vídeo curto'],['audio','Áudio']].map(o=>`<option value="${o[0]}" ${(t.proof||'none')===o[0]?'selected':''}>${o[1]}</option>`).join('')}</select>
  <p class="muted">Passos (um por linha; comece com um emoji se quiser)</p><textarea onchange="upd(${t.id},'steps',this.value)">${esc(t.steps.map(s=>s.icon+' '+s.text).join('\n'))}</textarea>
+ ${tkVoz(t)}
  <p><button class="btn sec small" onclick="trigger(${t.id})">⏰ Testar lembrete</button> <button class="btn sec small" onclick="delTask(${t.id})">Remover</button></p></details>`).join('')}
  <h2>Biblioteca de atividades de casa</h2><div class="lib">${LIB.map((l,i)=>`<button class="btn sec small" onclick="addLib(${i})">+ ${esc(l.icon)} ${esc(l.name)}</button>`).join('')}</div>
  <button class="btn" style="margin-top:10px" onclick="addTask()">+ Nova atividade em branco</button></div>`;}
@@ -314,8 +316,8 @@ function parAgente(){return `<div class="pad"><h1>Agente 🤖</h1><p class="mute
  <h2>Aprendendo juntos (exemplo)</h2><div class="card"><h3>3 minutos: o que a recusa pode estar comunicando</h3><p>Quando ela recusa uma atividade, pode estar dizendo "está difícil", "estou cansada" ou "não entendi". Vale tentar dividir em passos menores e oferecer uma escolha.</p><button class="btn sec small" onclick="say('Quando ela recusa uma atividade, pode estar dizendo que está difícil, que está cansada, ou que não entendeu. Vale tentar dividir em passos menores e oferecer uma escolha.',1)">🔊 Ouvir a lição</button></div>
  <h2>Conversa para conhecer a família</h2><div class="card"><p>Na próxima etapa, vocês respondem em áudio a perguntas guiadas e o agente monta um perfil vivo, que só vira regra depois da confirmação de vocês.</p><button class="btn sec small" disabled>Em breve</button></div></div>`;}
 
-function parView(){const m={hoje:parHoje,ajustes:parAjustes,agente:parAgente,conta:parConta,remoto:parRemoto};return (m[S.pTab]||parHoje)()+parTabs();}
-function render(){document.body.className=S.cfg.still?'still':'';$('#app').innerHTML=topbar()+(S.view==='kid'?kidView():(S.view==='pin'?pinScreen():parView()));if(Date.now()-lastSave>1500)save();}
+function parView(){const m={hoje:parHoje,ajustes:parAjustes,agente:parAgente,conta:parConta,remoto:parRemoto,perfil:parPerfil};return (m[S.pTab]||parHoje)()+parTabs();}
+function render(){document.body.className=(S.cfg.still?'still ':'')+(S.cfg.read==='none'&&S.view==='kid'?'noread':'');$('#app').innerHTML=topbar()+(S.view==='kid'?kidView():(S.view==='pin'?pinScreen():parView()));if(Date.now()-lastSave>1500)save();}
 
 /* ===== v0.5: fundação (salvar no aparelho, PIN, cópia de segurança, pote com temas, voz dos pais) ===== */
 const JARS={star:{e:'⭐',one:'estrela',many:'estrelas',nome:'Estrelas'},coin:{e:'🪙',one:'moeda',many:'moedas',nome:'Moedas'},gem:{e:'💎',one:'diamante',many:'diamantes',nome:'Diamantes'}};
@@ -365,7 +367,7 @@ function idbOpen(){return new Promise(function(res){try{const r=indexedDB.open('
 function vozLoadAll(){idbOpen().then(function(db){if(!db)return;try{const rq=db.transaction('voz').objectStore('voz').openCursor();rq.onsuccess=function(){const c=rq.result;if(c){VOZ[c.key]=c.value;c.continue();}else provaLoadAll(db);};}catch(e){}});}
 function vozPut(k,v){VOZ[k]=v;if(!idb)return;try{idb.transaction('voz','readwrite').objectStore('voz').put(v,k);}catch(e){}}
 function vozDel(k){delete VOZ[k];if(idb){try{idb.transaction('voz','readwrite').objectStore('voz').delete(k);}catch(e){}}render();}
-function playVoz(k,fallbackText){const v=VOZ[k];if(!v)return false;try{if(CUR_AUDIO){CUR_AUDIO.pause();}if('speechSynthesis' in window)speechSynthesis.cancel();const a=new Audio(URL.createObjectURL(new Blob([v.buf],{type:v.type})));CUR_AUDIO=a;const p=a.play();if(p&&p.catch)p.catch(function(){if(fallbackText)speak(fallbackText);});return true;}catch(e){return false;}}
+function playVoz(k,fallbackText){const v=VOZ[k];if(!v)return false;try{if(CUR_AUDIO){CUR_AUDIO.onended=null;CUR_AUDIO.pause();}if('speechSynthesis' in window)speechSynthesis.cancel();const a=new Audio(URL.createObjectURL(new Blob([v.buf],{type:v.type})));CUR_AUDIO=a;const p=a.play();if(p&&p.catch)p.catch(function(){if(fallbackText)speak(fallbackText);});return true;}catch(e){return false;}}
 function vozRec(k){if(REC){recStop();return;}
  if(!navigator.mediaDevices||!window.MediaRecorder){S.vozMsg='Este aparelho não grava áudio por aqui.';render();return;}
  navigator.mediaDevices.getUserMedia({audio:true}).then(function(st){const ch=[];const mr=new MediaRecorder(st);REC={k:k,mr:mr,st:st};
@@ -551,7 +553,7 @@ async function nEraseProof(pid){const x=REM.proofs.find(function(y){return y.id=
 function proofBlob(pid){const b=REM.blobs[pid];if(!b)return '';return b.type.indexOf('image')===0?`<img src="${b.url}" style="width:100%;border-radius:14px;margin-top:8px">`:b.type.indexOf('video')===0?`<video src="${b.url}" controls style="width:100%;border-radius:14px;margin-top:8px"></video>`:`<audio src="${b.url}" controls style="width:100%;margin-top:8px"></audio>`;}
 /* --- convite por link --- */
 function nInvUrl(){const kid=NINV.role==='crianca';return location.origin+location.pathname+'?convite='+encodeURIComponent(NINV.code)+'&p='+(kid?'k':'a');}
-function nInvTxt(){return NINV.role==='crianca'?'Convite para parear este celular no app Meu Dia (vale 15 minutos): ':'Convite para a família no app Meu Dia, como '+(ROLEN[NINV.role]||'')+' (vale 48 horas): ';}
+function nInvTxt(){return (NINV.role==='crianca'?'Convite para parear este celular no app Meu Dia (vale 15 minutos). Código: ':'Convite para a família no app Meu Dia, como '+(ROLEN[NINV.role]||'')+' (vale 48 horas). Código: ')+NINV.code+'. Toque no link: ';}
 function nShare(){if(!NINV)return;const u=nInvUrl(),t=nInvTxt();
  if(navigator.share){navigator.share({title:'Convite Meu Dia',text:t,url:u}).catch(function(){});}else{window.open('https://wa.me/?text='+encodeURIComponent(t+u),'_blank');}}
 function nCopyInv(){if(!NINV)return;const x=nInvTxt()+nInvUrl();try{navigator.clipboard.writeText(x).then(function(){NMSG='Link copiado. Cole no WhatsApp.';render();}).catch(function(){NMSG='Não consegui copiar. Use o botão Compartilhar.';render();});}catch(e){NMSG='Não consegui copiar. Use o botão Compartilhar.';render();}}
@@ -600,11 +602,91 @@ function parConta(){let h=`<div class="pad"><h1>Conta e família 🔗</h1>${nSta
  else{h+=`<div class="card"><h3>👨‍👩‍👧 ${esc(ROLEN[N.role]||N.role)} · família conectada</h3><p class="muted">As regras que você muda em Ajustes sobem sozinhas. Se quiser forçar agora:</p><button class="btn sec small" onclick="nwrap(async function(){await nPublish(true);NMSG='Regras publicadas.';})">⬆ Publicar regras agora</button></div>
  ${isG()?`<div class="card"><h3>Parear o celular dela</h3><p class="muted">Gere o código, abra o app no celular dela, vá em Conta e digite o código. Vale 15 minutos.</p><button class="btn small" onclick="nInvite('crianca')">Gerar código do aparelho dela</button>
  <h3 style="margin-top:14px">Convidar outra pessoa</h3><select id="nIr" onchange="NF.irole=this.value" style="width:100%;padding:12px;border-radius:12px;margin:4px 0"><option value="mae" ${NF.irole==='mae'?'selected':''}>Mãe</option><option value="pai" ${NF.irole==='pai'?'selected':''}>Pai</option><option value="responsavel" ${NF.irole==='responsavel'?'selected':''}>Outro responsável</option><option value="terapeuta" ${NF.irole==='terapeuta'?'selected':''}>Terapeuta (só acompanha)</option><option value="escola" ${NF.irole==='escola'?'selected':''}>Escola (só acompanha)</option></select><button class="btn sec small" onclick="nInvite(NF.irole)">Gerar convite (vale 48 h)</button>
- ${NINV?`<div class="card" style="background:var(--soft)"><p class="muted">Código para ${esc(ROLEN[NINV.role])} (vale ${NINV.role==='crianca'?'15 minutos':'48 horas'}):</p><div class="clock" style="font-size:44px">${esc(NINV.code)}</div><div class="row" style="margin-top:8px"><button class="btn small grow" onclick="nShare()">📤 Compartilhar convite</button><button class="btn sec small grow" onclick="nCopyInv()">📋 Copiar link</button></div></div>`:''}</div>`:''}
+ ${NINV?`<div class="card" style="background:var(--soft)"><p class="muted">Código para ${esc(ROLEN[NINV.role])} (vale ${NINV.role==='crianca'?'15 minutos':'48 horas'}):</p><div class="clock" style="font-size:44px">${esc(NINV.code)}</div><div class="row" style="margin-top:8px"><button class="btn ok small" style="width:100%;margin-bottom:8px" onclick="nWhats()">💬 Enviar pelo WhatsApp</button></div><div class="row"><button class="btn sec small grow" onclick="nShare()">📤 Mais opções</button><button class="btn sec small grow" onclick="nCopyInv()">📋 Copiar link</button></div></div>`:''}</div>`:''}
  <div class="card"><h3>Quem está na família</h3>${REM.members.map(function(m){return `<div class="row" style="margin:6px 0"><div class="grow"><b>${esc(ROLEN[m.role]||m.role)}</b> <span class="muted">${esc(m.display||'')}${m.user_id===N.uid?' (você)':''}</span></div>${isG()&&m.user_id!==N.uid?`<button class="btn sec small" onclick="nRemove('${m.user_id}')">remover</button>`:''}</div>`;}).join('')||'<span class="muted">Carregando...</span>'}</div>
  <button class="btn sec small" onclick="if(confirm('Sair da conta neste celular?'))nLogout()">Sair da conta</button>`;}
- return h+`<div class="card muted" style="text-align:left">🔒 <b>O que sobe para a nuvem:</b> regras e rotina, progresso do dia, check-ins e provas (temporárias). <b>Não sobe:</b> PIN, vozes gravadas, nome completo, laudo ou diagnóstico.</div></div>`;}
+ return h+appCard()+`<div class="card muted" style="text-align:left">🔒 <b>O que sobe para a nuvem:</b> regras, rotina, perfil e módulos, progresso do dia, check-ins e provas (temporárias). <b>Não sobe:</b> PIN, vozes gravadas, nome completo, laudo ou diagnóstico.</div></div>`;}
 try{const sp=new URLSearchParams(location.search),cv=sp.get('convite');if(cv){NF.code=cv.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,12);NF.hint=sp.get('p')==='k'?'k':'a';S.pTab='conta';window.__convite=1;history.replaceState(null,'',location.pathname);}}catch(e){}
+/* ===== v0.8: perfil de partida, módulos, modo sem leitura, voz dos pais por atividade ===== */
+const MODS=[['rotina','🪥','Rotina'],['casa','🧹','Casa'],['escola','🎒','Escola'],['talk','💬','Falar (figuras e frases)'],['store','🎁','Loja de trocas'],['calm','🌿','Calma'],['play','🏃','Tempo de brincar']];
+const READN={none:'Ainda não lê (figuras e áudio)',words:'Lê algumas palavras',phrases:'Lê frases curtas',good:'Lê bem'};
+const MEMN={visual:'Precisa de apoio visual o tempo todo',cues:'Lembra com pistas e lembretes',good:'Lembra bem'};
+const CHALN={ok:'Aceita bem',choice:'Aceita se puder escolher',block:'Costuma se bloquear: precisa de degraus pequenos'};
+function modOn(a){return !S.cfg.mods||S.cfg.mods[a]!==false;}
+function visTasks(){return S.tasks.filter(function(t){return modOn(t.area);});}
+function narrOn(){return !!S.cfg.narr||S.cfg.read==='none';}
+function vk(id,n){return 'tk'+id+'s'+n;}
+function setMod(k,v){S.cfg.mods[k]=v;render();}
+function dlgOf(r){return ({none:'passo',words:'passo',phrases:'moderado',good:'objetivo'})[r]||'moderado';}
+function setRead(v){S.cfg.read=v;S.cfg.dlg.g=dlgOf(v);render();}
+function dayBtn(){if(S.cfg.read!=='none')return '';const l=sortT(visTasks().filter(function(t){return t.state==='todo';})).map(function(t){return t.name;});const tx=l.length?'Hoje vamos fazer: '+l.join(', ')+'.':'Hoje está tudo pronto!';return `<button class="btn" style="margin:8px 0" onclick="say(${q(tx)},1)">🔊 O que vamos fazer?</button>`;}
+/* voz dos pais por atividade */
+function sayStart(t){const ik='tk'+t.id,sk=vk(t.id,0),useV=S.cfg.useVoz!==false;
+ if(useV&&VOZ[ik]){playVoz(ik,t.name);if(VOZ[sk]&&CUR_AUDIO){CUR_AUDIO.onended=function(){if(S.cur===t.id&&S.step===0&&S.kid==='task')playVoz(sk,'');};}return;}
+ say((prof(t.area)==='passo'?'Vamos começar: '+t.name+'. ':'')+stepSay(t),false,sk);}
+function vozRow(k,l){const rec=REC&&REC.k===k;return `<div class="row" style="margin:4px 0"><div class="grow muted" style="font-size:13px">${esc(l)}</div><button class="btn small ${rec?'':'sec'}" style="width:auto" onclick="vozRec('${k}')">${rec?'⏹':'🎙️'}</button>${VOZ[k]?`<button class="btn sec small" style="width:auto" onclick="playVoz('${k}')">▶</button><button class="btn sec small" style="width:auto" onclick="vozDel('${k}')">🗑️</button>`:''}</div>`;}
+function tkVoz(t){return `<p class="muted">Voz dos pais nesta atividade. Grave no celular dela: o app usa a sua voz no lugar da voz do aparelho.</p>${vozRow('tk'+t.id,'Chamada: "'+t.name+'"')}${t.steps.map(function(s,i){return vozRow(vk(t.id,i),(i+1)+'. '+s.text);}).join('')}${S.vozMsg?`<p class="muted">${esc(S.vozMsg)}</p>`:''}`;}
+/* assistente de perfil */
+const WQ=[
+ {id:'age',t:'Qual é a idade dela?',h:'Define o visual e o tom, para respeitar a fase da vida.',o:[['k','Até 7 anos'],['m','8 a 12 anos'],['t','13 anos ou mais']]},
+ {id:'read',t:'Como ela lê e entende frases hoje?',h:'Não existe resposta certa. O app se adapta.',o:[['none','Ainda não lê: precisa de figuras e áudio'],['words','Lê algumas palavras simples'],['phrases','Lê frases curtas'],['good','Lê bem']]},
+ {id:'comm',t:'Como ela se comunica melhor hoje?',h:'',o:[['fig','Com figuras e apoio visual'],['few','Fala poucas palavras'],['talk','Fala em frases']]},
+ {id:'mem',t:'Como é a memória do dia a dia?',h:'Para saber quanto o app deve lembrar por ela.',o:[['visual','Precisa de apoio visual o tempo todo'],['cues','Lembra com pistas e lembretes'],['good','Lembra bem']]},
+ {id:'chal',t:'Como ela reage a desafios novos?',h:'',o:[['ok','Aceita bem'],['choice','Aceita se puder escolher'],['block','Costuma se bloquear: precisa de degraus bem pequenos']]},
+ {id:'str',t:'O que ela tem de mais forte?',h:'Marque o que quiser (até 4).',multi:true,max:4,o:[['vis','Memória visual (fotos e imagens)'],['voc','Vocabulário'],['dic','Dicção e fala'],['est','Gosta de estudar e aprender'],['mus','Música e sons'],['mov','Movimento e atividades práticas']]},
+ {id:'goal',t:'O que vocês mais querem apoiar agora?',h:'Escolha até 3.',multi:true,max:3,o:[['rot','Rotina do dia'],['casa','Tarefas de casa'],['esc','Escola'],['com','Pedir o que precisa (comunicação)'],['tela','Uso equilibrado de tela'],['calma','Calma e emoções'],['pro','Metas indicadas por um profissional']]},
+ {id:'tela',t:'Como a tela entra na rotina hoje?',h:'',o:[['livre','Sem regras fixas'],['horas','Com horários combinados'],['dificil','É difícil parar quando acaba']]},
+ {id:'who',t:'Quem mais vai participar?',h:'Escolha até 3. Os convites ficam em Conta.',multi:true,max:3,o:[['fam','Só a família'],['esc','Escola'],['pro','Terapeuta ou profissional de saúde']]}
+];
+function profPlan(a){const g=a.goal||[],has=function(x){return g.indexOf(x)>=0;},p={notes:[]};
+ p.read=a.read||'phrases';p.dlg=dlgOf(p.read);p.mem=a.mem||'good';p.chal=a.chal||'ok';p.canal=a.str||[];
+ p.levels=({k:{1:true,2:false,3:false},m:{1:true,2:true,3:false},t:{1:false,2:true,3:true}})[a.age||'m'];
+ const any=has('rot')||has('casa')||has('esc');
+ p.mods={rotina:any?has('rot'):true,casa:any?has('casa'):true,escola:has('esc'),talk:has('com')||a.comm==='fig'||a.comm==='few',store:true,calm:has('calma')||(a.chal&&a.chal!=='ok'),play:has('tela')||(a.tela&&a.tela!=='livre')};
+ p.check=has('calma')||a.mem==='visual';
+ p.support=(p.read==='none'||p.read==='words'||a.mem==='visual');
+ p.notes.push(a.age==='t'?'Visual e parceiros de adolescente (níveis intermediário e realista).':a.age==='k'?'Visual e parceiros infantis.':'Parceiros infantis e intermediários.');
+ p.notes.push(p.read==='none'?'Modo sem leitura: figuras grandes, áudio automático e textos escondidos na visão dela.':p.read==='words'?'Áudio automático e passo a passo, com figuras.':p.read==='phrases'?'Diálogo moderado, com frases curtas.':'Diálogo objetivo.');
+ p.notes.push(a.mem==='visual'?'Setas e contorno sempre ligados e check-in do dia ligado.':a.mem==='cues'?'Lembretes e pistas visuais.':'Memória: sem apoio extra.');
+ const on=MODS.filter(function(m){return p.mods[m[0]];}).map(function(m){return m[2];}),off=MODS.filter(function(m){return !p.mods[m[0]];}).map(function(m){return m[2];});
+ p.notes.push('Módulos ligados: '+on.join(', ')+'.');if(off.length)p.notes.push('Desligados por enquanto: '+off.join(', ')+'.');
+ if(p.chal!=='ok')p.notes.push('Anotado: degraus pequenos, escolha entre 2 e botão de pausa chegam na v0.9. Por enquanto a Calma fica ligada.');
+ if(p.canal.length)p.notes.push('Pontos fortes anotados para escolher formatos de atividade (v0.9).');
+ if(a.who&&(a.who.indexOf('esc')>=0||a.who.indexOf('pro')>=0))p.notes.push('Convide escola ou profissional em Conta. Eles só acompanham.');
+ return p;}
+function applyProfile(a){const c=S.cfg,p=profPlan(a);
+ c.prof={done:true,ans:a,when:new Date().toISOString().slice(0,10)};
+ c.read=p.read;c.mem=p.mem;c.chal=p.chal;c.canal=p.canal;c.dlg.g=p.dlg;c.mods=p.mods;
+ if(p.support){c.narr=true;c.arrows=true;c.outline=true;c.fadeLast=false;}
+ if(p.check)c.check.on=true;
+ c.agent.levels=p.levels;if(!p.levels[avById(c.agent.av).l]){const f=AV.find(function(x){return p.levels[x.l];});if(f)c.agent.av=f.id;}
+ S.profMsg='Perfil aplicado. Tudo pode ser mudado em Ajustes.';save();}
+function wzStart(){S.wz={i:0,a:JSON.parse(JSON.stringify((S.cfg.prof&&S.cfg.prof.ans)||{}))};S.pTab='perfil';render();window.scrollTo(0,0);}
+function wzPick(id,v){const w=WQ.find(function(x){return x.id===id;}),a=S.wz.a;
+ if(w.multi){const l=a[id]||[],i=l.indexOf(v);if(i>=0)l.splice(i,1);else if(l.length<w.max)l.push(v);a[id]=l;}else a[id]=v;render();}
+function wzGo(d){S.wz.i=Math.max(0,Math.min(WQ.length,S.wz.i+d));render();window.scrollTo(0,0);}
+function wzApply(){applyProfile(S.wz.a);S.wz=null;S.pTab='hoje';render();window.scrollTo(0,0);}
+function parPerfil(){if(!S.wz)S.wz={i:0,a:{}};const w=S.wz,i=w.i;
+ if(i>=WQ.length){const p=profPlan(w.a);return `<div class="pad"><h1>Resumo do perfil</h1><p class="muted">É isto que o app vai ligar. Nada aqui é diagnóstico: são só ajustes, e vocês mudam quando quiserem.</p><div class="card">${p.notes.map(function(n){return '<p>• '+esc(n)+'</p>';}).join('')}</div>
+ <button class="btn ok" onclick="wzApply()">Aplicar o perfil</button><p></p><button class="btn sec" onclick="wzGo(-1)">⬅ Voltar</button></div>`;}
+ const x=WQ[i],sel=w.a[x.id];const is=function(v){return x.multi?(sel||[]).indexOf(v)>=0:sel===v;};
+ return `<div class="pad"><p class="muted">Pergunta ${i+1} de ${WQ.length}</p><div class="bar"><div class="jarfill" style="position:static;height:100%;width:${Math.round((i+1)/WQ.length*100)}%"></div></div><h1>${esc(x.t)}</h1>${x.h?`<p class="muted">${esc(x.h)}</p>`:''}
+ ${x.o.map(function(o){return `<button class="btn ${is(o[0])?'':'sec'}" style="margin:6px 0;text-align:left" onclick="wzPick('${x.id}','${o[0]}')">${is(o[0])?'✅ ':''}${esc(o[1])}</button>`;}).join('')}
+ <div class="row" style="margin-top:14px"><button class="btn sec small grow" onclick="${i===0?"S.wz=null;S.pTab='hoje';render()":'wzGo(-1)'}">⬅ ${i===0?'Cancelar':'Voltar'}</button><button class="btn small grow" onclick="wzGo(1)">${i===WQ.length-1?'Ver resumo':'Próxima ➜'}</button></div></div>`;}
+function profBanner(){const m=S.profMsg?`<div class="hint">${esc(S.profMsg)}</div>`:'';if(S.cfg.prof&&S.cfg.prof.done)return m;return m+`<div class="hint">🧭 <b>Perfil de partida:</b> responda 9 perguntas rápidas e o app liga só o que faz sentido para ela.<p><button class="btn small" style="width:auto" onclick="wzStart()">Configurar agora</button></p></div>`;}
+function perfCard(){const d=S.cfg.prof&&S.cfg.prof.done;return `<h2>Perfil de partida</h2><div class="card"><p class="muted">${d?'Perfil aplicado em '+esc(S.cfg.prof.when)+'. Refazer o assistente atualiza os ajustes abaixo.':'Ainda não configurado. O assistente liga os módulos certos para a família.'}</p><button class="btn ${d?'sec':''} small" style="width:auto" onclick="wzStart()">${d?'Refazer o assistente':'Configurar agora'}</button></div>`;}
+function modCard(){const c=S.cfg;const sel=function(cur,obj,fn){return `<select onchange="${fn}(this.value)">${Object.keys(obj).map(function(k){return `<option value="${k}" ${cur===k?'selected':''}>${esc(obj[k])}</option>`;}).join('')}</select>`;};
+ return `<h2>Módulos e perfil dela</h2><div class="card"><p class="muted">Ligue só o que faz sentido agora. O que ficar desligado some da visão dela.</p>${MODS.map(function(m){return `<label class="sw">${m[1]} ${m[2]}<input type="checkbox" ${modOn(m[0])?'checked':''} onchange="setMod('${m[0]}',this.checked)"></label>`;}).join('')}
+ <p class="muted">Como ela lê hoje (muda o diálogo; "ainda não lê" ativa o modo sem leitura)</p>${sel(c.read,READN,'setRead')}
+ <p class="muted">Memória</p>${sel(c.mem,MEMN,"(function(v){S.cfg.mem=v;render()})")}
+ <p class="muted">Reação a desafios</p>${sel(c.chal,CHALN,"(function(v){S.cfg.chal=v;render()})")}</div>`;}
+
+/* --- envio por WhatsApp --- */
+function openUrl(u){const a=document.createElement('a');a.href=u;a.target='_blank';a.rel='noopener';document.body.appendChild(a);a.click();a.remove();}
+function appUrl(){return location.origin+location.pathname.replace(/index\.html$/,'');}
+function nWhats(){if(!NINV)return;openUrl('https://wa.me/?text='+encodeURIComponent(nInvTxt()+nInvUrl()));}
+function nWhatsApp(){openUrl('https://wa.me/?text='+encodeURIComponent('Meu Dia, o app da nossa família. Abra este endereço no celular e adicione à tela inicial: '+appUrl()));}
+function appCard(){return `<div class="card"><h3>📲 Enviar o app para outro celular</h3><p class="muted">Para instalar no celular dela ou da mãe. A mensagem leva só o endereço do app, sem dados.</p><button class="btn ok small" style="width:100%" onclick="nWhatsApp()">💬 Enviar pelo WhatsApp</button></div>`;}
 
 nload();setInterval(nSync,20000);setTimeout(nSync,1500);
 load();vozLoadAll();if(window.__convite){S.view='kid';setView('par');}
