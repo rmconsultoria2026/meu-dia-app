@@ -188,7 +188,7 @@ function sugg(id,ok){const s=S.sugg.find(x=>x.id===id);s.s=ok?'aceita':'depois';
 function resetDay(){S.play={ready:S.cfg.play.min,running:false,ended:false,left:0,total:0,warned:{}};S.tasks.forEach(t=>t.state='todo');S.pending=S.pending.filter(p=>p.type!=='tarefa');S.lock=null;S.fired={};render();}
 function resetWeek(){S.week.done=0;S.week.counted=false;render();}
 
-function topbar(){return `<div class="top"><button class="${S.view==='kid'?'on':''}" onclick="setView('kid')">👧 Visão dela</button><button class="${S.view==='par'?'on':''}" onclick="setView('par')">👨‍👩‍👧 Visão dos pais</button></div><div class="ribbon">Laboratório v0.6 · fica salvo neste aparelho · a IA aqui é simulada</div>`;}
+function topbar(){return `<div class="top"><button class="${S.view==='kid'?'on':''}" onclick="setView('kid')">👧 Visão dela</button><button class="${S.view==='par'?'on':''}" onclick="setView('par')">👨‍👩‍👧 Pais e responsáveis</button></div><div class="ribbon">Laboratório v0.7 · ${N.mode==='kid'?'pareado com a família':N.mode==='parent'?'conta da família ligada':'salvo só neste aparelho'} · a IA aqui é simulada</div>`;}
 
 function kidNav(){const n=[['home','🏠','Meu dia'],['casa','🧹','Casa'],['escola','🎒','Escola'],['talk','💬','Falar'],['store','🎁','Loja'],['calm','🌿','Calma']];return `<div class="nav">${n.map(x=>`<button class="${S.kid===x[0]?'on':''}" onclick="go('${x[0]}')"><span>${x[1]}</span>${x[2]}</button>`).join('')}</div>`;}
 
@@ -253,7 +253,7 @@ function kidCalm(){return `<div class="pad" style="text-align:center"><h1>Calma 
 
 function kidView(){const m={home:kidHome,casa:()=>kidArea('casa','Casa 🏠','Aqui estão as atividades de casa.'),escola:()=>kidArea('escola','Escola 🎒','Aqui estão os avisos e as atividades da escola.'),task:kidTask,alarm:kidAlarm,done:kidDone,store:kidStore,talk:kidTalk,calm:kidCalm,play:kidPlay,avatar:kidAvatar,proof:kidProof,checkin:kidCheckin};return m[S.kid]()+(['task','done','alarm','proof','checkin','avatar'].includes(S.kid)?'':kidNav());}
 
-function parTabs(){const n=[['hoje','📋','Hoje'],['ajustes','⚙️','Ajustes'],['agente','🤖','Agente']];return `<div class="nav">${n.map(x=>`<button class="${S.pTab===x[0]?'on':''}" onclick="S.pTab='${x[0]}';render();window.scrollTo(0,0)"><span>${x[1]}</span>${x[2]}</button>`).join('')}</div>`;}
+function parTabs(){const n=[['hoje','📋','Hoje']];if(N.mode==='parent')n.push(['remoto','📡','Remoto']);n.push(['ajustes','⚙️','Ajustes'],['agente','🤖','Agente'],['conta','🔗','Conta']);return `<div class="nav">${n.map(x=>`<button class="${S.pTab===x[0]?'on':''}" onclick="S.pTab='${x[0]}';render();window.scrollTo(0,0)"><span>${x[1]}</span>${x[2]}</button>`).join('')}</div>`;}
 
 function parHoje(){const done=S.tasks.filter(t=>t.state==='done').length;
  return `<div class="pad"><h1>Painel dos pais</h1>
@@ -314,7 +314,7 @@ function parAgente(){return `<div class="pad"><h1>Agente 🤖</h1><p class="mute
  <h2>Aprendendo juntos (exemplo)</h2><div class="card"><h3>3 minutos: o que a recusa pode estar comunicando</h3><p>Quando ela recusa uma atividade, pode estar dizendo "está difícil", "estou cansada" ou "não entendi". Vale tentar dividir em passos menores e oferecer uma escolha.</p><button class="btn sec small" onclick="say('Quando ela recusa uma atividade, pode estar dizendo que está difícil, que está cansada, ou que não entendeu. Vale tentar dividir em passos menores e oferecer uma escolha.',1)">🔊 Ouvir a lição</button></div>
  <h2>Conversa para conhecer a família</h2><div class="card"><p>Na próxima etapa, vocês respondem em áudio a perguntas guiadas e o agente monta um perfil vivo, que só vira regra depois da confirmação de vocês.</p><button class="btn sec small" disabled>Em breve</button></div></div>`;}
 
-function parView(){const m={hoje:parHoje,ajustes:parAjustes,agente:parAgente};return m[S.pTab]()+parTabs();}
+function parView(){const m={hoje:parHoje,ajustes:parAjustes,agente:parAgente,conta:parConta,remoto:parRemoto};return (m[S.pTab]||parHoje)()+parTabs();}
 function render(){document.body.className=S.cfg.still?'still':'';$('#app').innerHTML=topbar()+(S.view==='kid'?kidView():(S.view==='pin'?pinScreen():parView()));if(Date.now()-lastSave>1500)save();}
 
 /* ===== v0.5: fundação (salvar no aparelho, PIN, cópia de segurança, pote com temas, voz dos pais) ===== */
@@ -338,7 +338,7 @@ function load(){try{const o=JSON.parse(localStorage.getItem(KEY)||'null');if(!o)
 document.addEventListener('visibilitychange',function(){if(document.hidden)save();});
 window.addEventListener('pagehide',save);
 /* PIN dos pais */
-function pinScreen(){const has=!!S.cfg.pin;return `<div class="pad" style="text-align:center"><div style="font-size:70px;margin-top:20px">🔒</div><h1>Área dos pais</h1>
+function pinScreen(){const has=!!S.cfg.pin;return `<div class="pad" style="text-align:center"><div style="font-size:70px;margin-top:20px">🔒</div><h1>Área dos pais e responsáveis</h1>
  <p class="muted">${has?'Digite o PIN de 4 números.':'Crie um PIN de 4 números para esta área. Ele é uma barreira simples, não um cofre.'}</p>
  <p><input id="pinIn" type="password" inputmode="numeric" maxlength="4" autocomplete="off" style="font-size:28px;text-align:center;width:150px;letter-spacing:8px;padding:10px;border-radius:14px;border:2px solid var(--line)"></p>
  ${S.pinMsg?`<p style="color:#b42318;font-weight:700">${esc(S.pinMsg)}</p>`:''}
@@ -440,7 +440,174 @@ function setCiTimes(v){S.cfg.check.times=v.split(',').map(function(s){return s.t
 function ciTick(){const c=S.cfg.check;if(!c||!c.on||S.view!=='kid'||['task','proof','checkin','play'].indexOf(S.kid)>=0)return;const d=new Date(),hm=d.toTimeString().slice(0,5),key=d.toDateString();(c.times||[]).forEach(function(t){if(t===hm&&S.ciFired[t]!==key){S.ciFired[t]=key;startCheckin();}});}
 setInterval(ciTick,15000);
 
-load();vozLoadAll();
+/* ===== v0.7: família na nuvem (Supabase): login, pareamento, painel remoto ===== */
+const SB_URL='https://bhiriwlinldsytheqeih.supabase.co',SB_KEY='sb_publishable_K72I1t-hDD4V9Ds2YF94ew_UQ1KK1K0',NKEY='apoio_net_v07';
+let N={mode:'off',fid:'',role:'',display:'',uid:'',ses:null,cfgAt:'',pubHash:'',lastProg:'',lastProgTs:0,evLast:0,outbox:[],up:{},seen:'',err:''};
+let NMSG='',NBUSY=false,NINV=null,NSYNCING=false,NDEB=0,NLH='';
+const NF={em:'',fam:'',code:'',role:'pai',irole:'mae',disp:'',hint:''};
+const REM={prog:null,evs:[],proofs:[],members:[],decided:{},blobs:{}};
+function nsave(){try{localStorage.setItem(NKEY,JSON.stringify(N));}catch(e){}}
+function nload(){try{const o=JSON.parse(localStorage.getItem(NKEY)||'null');if(o)N=Object.assign(N,o);}catch(e){}}
+function setSes(j){N.ses={a:j.access_token,r:j.refresh_token,exp:Date.now()+(j.expires_in||3600)*1000};if(j.user&&j.user.id)N.uid=j.user.id;nsave();}
+async function nrefresh(){if(!N.ses||!N.ses.r)return;try{const r=await fetch(SB_URL+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{apikey:SB_KEY,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:N.ses.r})});if(r.ok)setSes(await r.json());else if(r.status===400||r.status===401){N.ses=null;nsave();}}catch(e){}}
+async function nfetch(path,o){o=o||{};if(N.ses&&N.ses.exp-Date.now()<60000)await nrefresh();
+ const go=function(){const h=Object.assign({apikey:SB_KEY},o.h||{});if(N.ses&&o.auth!==false)h.Authorization='Bearer '+N.ses.a;let body=o.body;if(body!==undefined&&typeof body!=='string'&&!(body instanceof Blob)){body=JSON.stringify(body);h['Content-Type']='application/json';}return fetch(SB_URL+path,{method:o.m||'GET',headers:h,body:body});};
+ let r=await go();if(r.status===401&&N.ses&&o.auth!==false){await nrefresh();if(N.ses)r=await go();}return r;}
+async function njson(path,o){const r=await nfetch(path,o);const t=await r.text();let j=null;try{j=t?JSON.parse(t):null;}catch(e){}
+ if(!r.ok){const m=(j&&(j.msg||j.message||j.error_description||j.error))||('erro '+r.status);const e=new Error(m);e.status=r.status;throw e;}return j;}
+function nerr(e){const m=String(e&&e.message||e);
+ if(/Failed to fetch|NetworkError|Load failed/i.test(m))return 'Sem internet agora. Tente de novo.';
+ if(/Invalid login/i.test(m))return 'E-mail ou senha incorretos.';
+ if(/already registered|already been registered/i.test(m))return 'Esse e-mail já tem conta. Use "Entrar".';
+ if(/convite inválido/i.test(m))return 'Código inválido ou vencido. Peça um novo.';
+ if(/anonymous/i.test(m)&&/disabled/i.test(m))return 'O login anônimo está desligado na Supabase.';
+ if(/email/i.test(m)&&/disabled/i.test(m))return 'O login por e-mail está desligado na Supabase.';
+ if(/rate limit/i.test(m))return 'Muitas tentativas. Espere alguns minutos.';
+ return m;}
+async function nwrap(fn){NBUSY=true;render();try{await fn();}catch(e){NMSG=nerr(e);}NBUSY=false;render();}
+const nv=id=>((document.querySelector(id)||{}).value||'');
+/* --- conta e família --- */
+async function nSign(kind){const em=nv('#nEmail').trim(),pw=nv('#nPass');NF.em=em;
+ if(!/^\S+@\S+\.\S+$/.test(em)||pw.length<8){NMSG='Use um e-mail válido e uma senha com 8 ou mais caracteres.';render();return;}
+ await nwrap(async function(){const j=await njson(kind==='up'?'/auth/v1/signup':'/auth/v1/token?grant_type=password',{m:'POST',auth:false,body:{email:em,password:pw}});
+  if(!j||!j.access_token)throw new Error('Confirme o e-mail na caixa de entrada e depois use "Entrar".');
+  setSes(j);await nFind();NMSG=N.fid?'Conectado.':'Conta pronta. Agora crie a família ou use um código de convite.';});}
+async function nFind(){const m=await njson('/rest/v1/members?user_id=eq.'+N.uid+'&select=family_id,role,display');
+ if(m&&m[0]){N.fid=m[0].family_id;N.role=m[0].role;N.display=m[0].display||'';N.mode=N.role==='crianca'?'kid':'parent';N.pubHash='';await nAfterLink(false);}}
+async function nAfterLink(creator){
+ if(N.mode==='parent'){S.pTab='remoto';
+  if(creator){await nPublish(true);}
+  else{const c=await njson('/rest/v1/family_state?family_id=eq.'+N.fid+'&key=eq.cfg&select=value,updated_at');if(c&&c[0]){applyRemoteCfg(c[0].value);N.cfgAt=c[0].updated_at;N.pubHash=JSON.stringify(cfgPack());}else if(N.role==='pai'||N.role==='mae'||N.role==='responsavel'){await nPublish(true);}}
+  try{await parSync();}catch(e){}}
+ else if(N.mode==='kid'){try{await kidSync();N.seen=new Date().toTimeString().slice(0,5);}catch(e){N.err=nerr(e);}}
+ nsave();}
+async function nCreateFam(){const lab=nv('#nFam').trim()||'Família',role=nv('#nRole')||'pai',dsp=nv('#nDispC').trim();NF.fam=lab;NF.role=role;NF.disp=dsp;
+ await nwrap(async function(){const fid=await njson('/rest/v1/rpc/create_family',{m:'POST',body:{p_label:lab,p_role:role,p_display:dsp}});N.fid=fid;N.role=role;N.display=dsp;N.mode='parent';N.pubHash='';await nAfterLink(true);NMSG='Família criada. Agora gere o código para parear o celular dela.';});}
+async function nInvite(role){await nwrap(async function(){const c=await njson('/rest/v1/rpc/create_invite',{m:'POST',body:{p_family:N.fid,p_role:role}});NINV={code:c,role:role,at:Date.now()};NMSG='';});}
+async function nJoin(anon){const code=nv('#nCode').trim().toUpperCase(),dsp=anon?'Filha':nv('#nDispJ').trim();NF.code=code;NF.disp=dsp;
+ if(code.length<4){NMSG='Digite o código completo.';render();return;}
+ if(!anon&&!dsp){NMSG='Diga como você quer aparecer para a família (ex.: Mãe, Fono Ana).';render();return;}
+ await nwrap(async function(){if(!N.ses){if(!anon)throw new Error('Entre com e-mail e senha primeiro.');const j=await njson('/auth/v1/signup',{m:'POST',auth:false,body:{data:{}}});if(!j||!j.access_token)throw new Error('Não consegui criar o acesso deste celular.');setSes(j);}
+  await njson('/rest/v1/rpc/redeem_invite',{m:'POST',body:{p_code:code,p_display:dsp}});await nFind();NMSG=N.mode==='kid'?'Este celular agora é o aparelho dela.':'Você entrou na família.';});}
+async function nLogout(){try{if(N.ses)await nfetch('/auth/v1/logout',{m:'POST'});}catch(e){}
+ N={mode:'off',fid:'',role:'',display:'',uid:'',ses:null,cfgAt:'',pubHash:'',lastProg:'',lastProgTs:0,evLast:0,outbox:[],up:{},seen:'',err:''};nsave();NINV=null;NMSG='Desvinculado. Os dados locais deste celular continuam.';REM.prog=null;REM.evs=[];REM.proofs=[];REM.members=[];render();}
+async function nRemove(uid){if(!confirm('Remover este aparelho/pessoa da família?'))return;await nwrap(async function(){await njson('/rest/v1/rpc/remove_member',{m:'POST',body:{p_family:N.fid,p_user:uid}});await parSync();});}
+/* --- regras: empacotar e aplicar --- */
+function cfgPack(){const c=JSON.parse(JSON.stringify(S.cfg));delete c.pin;
+ return {cfg:c,tasks:S.tasks.map(function(t){const r=Object.assign({},t);delete r.state;return r;}),rewards:S.rewards,avisos:S.avisos,week:{gift:S.week.gift,name:S.week.name,total:S.week.total},month:{gift:S.month.gift,name:S.month.name,weeks:S.month.weeks}};}
+function applyRemoteCfg(v){if(!v)return;
+ if(v.cfg){const pin=S.cfg.pin;S.cfg=mergeCfg(S.cfg,v.cfg);S.cfg.pin=pin;}
+ if(v.tasks){const old={};S.tasks.forEach(function(t){old[t.id]=t.state;});S.tasks=v.tasks.map(function(t){return Object.assign({},t,{state:old[t.id]||'todo'});});nid=Math.max(nid,...S.tasks.map(function(t){return t.id||0;}))+1;}
+ if(v.rewards)S.rewards=v.rewards;if(v.avisos)S.avisos=v.avisos;
+ if(v.week){S.week.gift=v.week.gift;S.week.name=v.week.name;S.week.total=v.week.total;}
+ if(v.month){S.month.gift=v.month.gift;S.month.name=v.month.name;S.month.weeks=v.month.weeks;}
+ save();}
+async function nPublish(force){const h=JSON.stringify(cfgPack());if(!force&&h===N.pubHash)return false;const at=new Date().toISOString();
+ await njson('/rest/v1/family_state?on_conflict=family_id,key',{m:'POST',h:{Prefer:'resolution=merge-duplicates,return=minimal'},body:{family_id:N.fid,key:'cfg',value:JSON.parse(h),updated_at:at}});
+ N.pubHash=h;N.cfgAt=at;nsave();return true;}
+/* --- aparelho dela --- */
+function kidProg(){const d=new Date().toDateString();
+ return {day:d,tasks:S.tasks.map(function(t){return {id:t.id,s:t.state};}),balance:S.balance,week:{done:S.week.done,total:S.week.total},month:{done:S.month.done,weeks:S.month.weeks},
+ pend:S.pending.map(function(p){const it=p.type==='tarefa'?T(p.id):S.rewards.find(function(x){return x.id===p.id;});return it?{type:p.type,id:p.id,icon:it.icon,name:it.name,val:p.type==='tarefa'?it.reward:it.cost}:null;}).filter(Boolean),
+ ci:(S.checkins||[]).filter(function(c){return new Date(c.ts).toDateString()===d;}).map(function(c){return {ts:c.ts,e:c.e,t:c.t,audio:!!c.audio};})};}
+async function kidPush(){const p=kidProg(),h=JSON.stringify(p);if(h===N.lastProg&&Date.now()-N.lastProgTs<120000)return;p.seen=Date.now();
+ await njson('/rest/v1/family_state?on_conflict=family_id,key',{m:'POST',h:{Prefer:'resolution=merge-duplicates,return=minimal'},body:{family_id:N.fid,key:'kid_progress',value:p,updated_at:new Date().toISOString()}});
+ N.lastProg=h;N.lastProgTs=Date.now();nsave();}
+function applyDecision(p){const i=S.pending.findIndex(function(x){return x.type===p.type&&x.id===p.id;});if(i<0)return false;if(p.ok)approve(i);else decline(i);return true;}
+async function nUploadProofs(){for(const k of Object.keys(VPROVA)){const v=VPROVA[k];if(!v||!v.buf)continue;const id=k+'@'+(v.ts||0);if(N.up[id]===2)continue;
+ const ty=v.type||'application/octet-stream',ext=ty.indexOf('jpeg')>=0?'jpg':(ty.split('/')[1]||'bin').split(';')[0],path=N.fid+'/'+k+'-'+(v.ts||0)+'.'+ext;
+ if(!N.up[id]){const r=await nfetch('/storage/v1/object/provas/'+path,{m:'POST',h:{'Content-Type':ty},body:new Blob([v.buf],{type:ty})});
+  if(!r.ok&&r.status!==409){const t=await r.text();if(!/Duplicate/i.test(t))throw new Error('Envio da prova falhou ('+r.status+')');}
+  N.up[id]=1;nsave();}
+ await njson('/rest/v1/proofs',{m:'POST',h:{Prefer:'return=minimal'},body:{family_id:N.fid,task_id:String(k),path:path}});N.up[id]=2;nsave();}}
+function nEvt(kind,payload){if(N.mode==='off')return;N.outbox.push({kind:kind,payload:payload,ts:new Date().toISOString()});if(N.outbox.length>200)N.outbox.shift();nsave();setTimeout(nSync,500);}
+async function nFlush(){while(N.outbox.length){const e=N.outbox[0];await njson('/rest/v1/events',{m:'POST',h:{Prefer:'return=minimal'},body:{family_id:N.fid,kind:e.kind,payload:e.payload,created_at:e.ts}});N.outbox.shift();nsave();}}
+async function kidSync(){let ch=false;
+ const c=await njson('/rest/v1/family_state?family_id=eq.'+N.fid+'&key=eq.cfg&select=value,updated_at');
+ if(c&&c[0]&&(Date.parse(c[0].updated_at)!==Date.parse(N.cfgAt)||!N.cfgAt)){applyRemoteCfg(c[0].value);N.cfgAt=c[0].updated_at;ch=true;}
+ const d=await njson('/rest/v1/events?family_id=eq.'+N.fid+'&kind=eq.decisao&id=gt.'+N.evLast+'&order=id.asc&select=id,payload');
+ for(const e of (d||[])){N.evLast=e.id;if(applyDecision(e.payload))ch=true;}
+ await nUploadProofs();await nFlush();await kidPush();return ch;}
+/* --- aparelho dos pais --- */
+const isG=()=>N.role==='pai'||N.role==='mae'||N.role==='responsavel';
+async function parSync(){const c=await njson('/rest/v1/family_state?family_id=eq.'+N.fid+'&key=eq.cfg&select=value,updated_at');
+ if(c&&c[0]&&N.pubHash&&Date.parse(c[0].updated_at)>(Date.parse(N.cfgAt)||0)+500&&JSON.stringify(cfgPack())===N.pubHash){applyRemoteCfg(c[0].value);N.cfgAt=c[0].updated_at;N.pubHash=JSON.stringify(cfgPack());}
+ if(isG()&&N.pubHash)await nPublish(false);
+ const kp=await njson('/rest/v1/family_state?family_id=eq.'+N.fid+'&key=eq.kid_progress&select=value');REM.prog=(kp&&kp[0])?kp[0].value:null;
+ REM.evs=await njson('/rest/v1/events?family_id=eq.'+N.fid+'&order=id.desc&limit=40&select=id,kind,payload,created_at')||[];
+ REM.members=await njson('/rest/v1/members?family_id=eq.'+N.fid+'&select=user_id,role,display')||[];
+ if(isG()){REM.proofs=await njson('/rest/v1/proofs?family_id=eq.'+N.fid+'&order=created_at.desc&select=id,task_id,path,created_at,expires_at')||[];
+  for(const x of REM.proofs.filter(function(x){return Date.parse(x.expires_at)<Date.now();}))await nDelProof(x);
+  REM.proofs=REM.proofs.filter(function(x){return Date.parse(x.expires_at)>=Date.now();});}
+ REM.decided={};}
+async function nDelProof(x){try{await nfetch('/storage/v1/object/provas/'+x.path,{m:'DELETE'});}catch(e){}await njson('/rest/v1/proofs?id=eq.'+x.id,{m:'DELETE',h:{Prefer:'return=minimal'}});if(REM.blobs[x.id]){try{URL.revokeObjectURL(REM.blobs[x.id].url);}catch(e){}delete REM.blobs[x.id];}}
+async function nDecide(i,ok){const p=((REM.prog||{}).pend||[]).filter(function(x){return !REM.decided[x.type+x.id];})[i];if(!p)return;
+ await nwrap(async function(){await njson('/rest/v1/events',{m:'POST',h:{Prefer:'return=minimal'},body:{family_id:N.fid,kind:'decisao',payload:{type:p.type,id:p.id,ok:ok}}});
+  if(p.type==='tarefa'){for(const x of REM.proofs.filter(function(x){return x.task_id===String(p.id);}))await nDelProof(x);}
+  REM.decided[p.type+p.id]=1;NMSG=ok?'Aprovado. Ela recebe quando o celular dela sincronizar.':'Devolvido para ela tentar de novo.';REM.proofs=REM.proofs.filter(function(x){return x.task_id!==String(p.id);});});}
+async function nShowProof(pid){const x=REM.proofs.find(function(y){return y.id===pid;});if(!x)return;
+ await nwrap(async function(){const r=await nfetch('/storage/v1/object/authenticated/provas/'+x.path);if(!r.ok)throw new Error('Não consegui abrir a prova ('+r.status+')');const b=await r.blob();REM.blobs[pid]={url:URL.createObjectURL(b),type:b.type||''};});}
+async function nEraseProof(pid){const x=REM.proofs.find(function(y){return y.id===pid;});if(!x)return;await nwrap(async function(){await nDelProof(x);REM.proofs=REM.proofs.filter(function(y){return y.id!==pid;});NMSG='Apagado.';});}
+function proofBlob(pid){const b=REM.blobs[pid];if(!b)return '';return b.type.indexOf('image')===0?`<img src="${b.url}" style="width:100%;border-radius:14px;margin-top:8px">`:b.type.indexOf('video')===0?`<video src="${b.url}" controls style="width:100%;border-radius:14px;margin-top:8px"></video>`:`<audio src="${b.url}" controls style="width:100%;margin-top:8px"></audio>`;}
+/* --- convite por link --- */
+function nInvUrl(){const kid=NINV.role==='crianca';return location.origin+location.pathname+'?convite='+encodeURIComponent(NINV.code)+'&p='+(kid?'k':'a');}
+function nInvTxt(){return NINV.role==='crianca'?'Convite para parear este celular no app Meu Dia (vale 15 minutos): ':'Convite para a família no app Meu Dia, como '+(ROLEN[NINV.role]||'')+' (vale 48 horas): ';}
+function nShare(){if(!NINV)return;const u=nInvUrl(),t=nInvTxt();
+ if(navigator.share){navigator.share({title:'Convite Meu Dia',text:t,url:u}).catch(function(){});}else{window.open('https://wa.me/?text='+encodeURIComponent(t+u),'_blank');}}
+function nCopyInv(){if(!NINV)return;const x=nInvTxt()+nInvUrl();try{navigator.clipboard.writeText(x).then(function(){NMSG='Link copiado. Cole no WhatsApp.';render();}).catch(function(){NMSG='Não consegui copiar. Use o botão Compartilhar.';render();});}catch(e){NMSG='Não consegui copiar. Use o botão Compartilhar.';render();}}
+/* --- laço de sincronização --- */
+async function nSync(manual){if(N.mode==='off'||!N.ses||!N.fid||NSYNCING||(document.hidden&&!manual))return;NSYNCING=true;let ch=false;
+ try{if(N.mode==='kid')ch=await kidSync();else await parSync();N.seen=new Date().toTimeString().slice(0,5);N.err='';}catch(e){N.err=nerr(e);if(e.status===401||e.status===403){}}
+ NSYNCING=false;nsave();nUI(ch);}
+function nUI(ch){const a=document.activeElement;if(a&&/INPUT|SELECT|TEXTAREA/.test(a.tagName))return;
+ if(S.view==='par'&&(S.pTab==='remoto'||S.pTab==='conta'))render();else if(N.mode==='kid'&&ch&&S.view==='kid'&&S.kid==='home')render();}
+const _save=save;save=function(){_save();if(N.mode==='off')return;const h=JSON.stringify(PERSIST.filter(function(k){return k!=='play'&&k!=='fired';}).map(function(k){return S[k];}));if(h===NLH)return;NLH=h;if(!NDEB)NDEB=setTimeout(function(){NDEB=0;nSync();},4000);};
+const _fin=finishNow;finishNow=function(){const t=T(S.cur);_fin.apply(this,arguments);if(t)nEvt('tarefa',{id:t.id,name:t.name,icon:t.icon,state:t.state});};
+const _cid=ciDone;ciDone=function(){const o=S.ci&&CI_OPTS[S.ci.opt];_cid.apply(this,arguments);if(o)nEvt('checkin',{e:o.e,t:o.t});};
+const _red=redeem;redeem=function(id){const r=S.rewards.find(function(x){return x.id===id;}),n=S.pending.length;_red.apply(this,arguments);if(r&&S.pending.length>n)nEvt('troca',{name:r.name,icon:r.icon});};
+const _ra=resetAll;resetAll=function(){if(S.resetArm){try{localStorage.removeItem(NKEY);}catch(e){}}_ra();};
+document.addEventListener('visibilitychange',function(){if(!document.hidden)nSync();});
+/* --- telas --- */
+const ROLEN={pai:'Pai',mae:'Mãe',responsavel:'Responsável',escola:'Escola',terapeuta:'Terapeuta',crianca:'Aparelho dela'};
+function ago(ts){const m=Math.round((Date.now()-ts)/60000);return m<1?'agora':m<60?'há '+m+' min':m<1440?'há '+Math.round(m/60)+' h':'há mais de 1 dia';}
+function hhmm(iso){try{return new Date(iso).toTimeString().slice(0,5);}catch(e){return '';}}
+function nStatus(){return `<p class="muted">${NBUSY?'⏳ Aguarde...':''}${N.err?'⚠️ '+esc(N.err)+' ':''}${NMSG?esc(NMSG):''}${N.seen&&!N.err?' Sincronizado às '+esc(N.seen)+'.':''}</p>`;}
+function parRemoto(){const p=REM.prog,hoje=p&&p.day===new Date().toDateString(),pend=(p&&hoje?p.pend:[]).filter(function(x){return !REM.decided[x.type+x.id];}),g=isG();
+ const st={todo:'a fazer',wait:'aguardando',done:'feita'};
+ return `<div class="pad"><h1>Acompanhar à distância 📡</h1>${nStatus()}
+ <div class="card"><p>${p?'📱 Aparelho dela visto <b>'+ago(p.seen)+'</b>.':'📱 O celular dela ainda não sincronizou. Confira em Conta se ele foi pareado.'}</p><button class="btn sec small" onclick="nwrap(async function(){await parSync();NMSG='Atualizado.';})">↻ Atualizar agora</button></div>
+ ${hoje?`<div class="stat"><div class="card"><b>${p.tasks.filter(function(t){return t.s==='done';}).length}/${p.tasks.length}</b><span class="muted">feitas hoje</span></div><div class="card"><b>${fmt(p.balance)}</b><span class="muted">no pote</span></div></div>
+ <h2>Aguardando ${pend.length?'('+pend.length+')':''}</h2>
+ ${pend.length?pend.map(function(x,i){const pr=x.type==='tarefa'?REM.proofs.find(function(y){return y.task_id===String(x.id);}):null;return `<div class="card"><div class="row"><div style="font-size:34px">${esc(x.icon)}</div><div class="grow"><h3>${x.type==='tarefa'?'Concluiu: ':'Quer trocar: '}${esc(x.name)}</h3><span class="muted">${x.type==='tarefa'?'Libera '+fmt(x.val):'Custa '+fmt(x.val)}</span></div></div>
+ ${pr?(REM.blobs[pr.id]?proofBlob(pr.id):`<button class="btn sec small" style="margin-top:8px" onclick="nShowProof('${pr.id}')">👁 Ver a prova</button>`):''}
+ ${g?`<div class="row" style="margin-top:10px"><button class="btn ok small grow" onclick="nDecide(${i},true)">Aprovar 💛</button><button class="btn sec small grow" onclick="nDecide(${i},false)">Hoje não</button></div>`:'<p class="muted">Só os responsáveis decidem.</p>'}</div>`;}).join(''):'<div class="card muted">Nada pendente agora.</div>'}
+ <h2>Atividades de hoje</h2><div class="card">${p.tasks.map(function(t){const d=S.tasks.find(function(x){return x.id===t.id;});return `<div class="row" style="margin:6px 0"><div style="font-size:26px">${esc(d?d.icon:'⭐')}</div><div class="grow">${esc(d?d.name:'Atividade')}</div><span class="tag ${t.s}">${st[t.s]||t.s}</span></div>`;}).join('')}</div>
+ <h2>Check-ins de hoje</h2>${p.ci.length?p.ci.map(function(c){const pr=REM.proofs.find(function(y){return y.task_id==='ci-'+c.ts;});return `<div class="card"><div class="row"><div style="font-size:30px">${esc(c.e)}</div><div class="grow"><b>${esc(c.t)}</b><br><span class="muted">${esc(hhmm(c.ts))}${c.audio?' · com áudio':''}</span></div></div>${pr?(REM.blobs[pr.id]?proofBlob(pr.id):`<button class="btn sec small" style="margin-top:8px" onclick="nShowProof('${pr.id}')">▶ Ouvir</button>`)+(g?` <button class="btn sec small" style="margin-top:8px" onclick="nEraseProof('${pr.id}')">🗑 Apagar</button>`:''):''}</div>`;}).join(''):'<div class="card muted">Nenhum check-in hoje.</div>'}`
+ :`<div class="card muted">Sem dados de hoje ainda. Quando ela abrir o app no celular, aparece aqui.</div>`}
+ <h2>Últimos acontecimentos</h2><div class="card">${REM.evs.filter(function(e){return e.kind!=='decisao';}).slice(0,12).map(function(e){const q=e.payload||{};return `<p class="muted" style="margin:6px 0">${esc(hhmm(e.created_at))} · ${e.kind==='tarefa'?esc((q.icon||'')+' enviou: '+q.name):e.kind==='checkin'?esc((q.e||'')+' check-in: '+q.t):e.kind==='troca'?esc((q.icon||'')+' pediu: '+q.name):esc(e.kind)}</p>`;}).join('')||'<span class="muted">Ainda sem registros.</span>'}</div>
+ <p class="muted">As provas (foto, vídeo e áudio) ficam guardadas só até vocês decidirem, ou por no máximo 7 dias, e depois são apagadas.</p></div>`;}
+function nin(id,ph,val,type){return `<input id="${id}" type="${type||'text'}" placeholder="${ph}" value="${esc(val||'')}" autocomplete="off" autocapitalize="off" style="width:100%;padding:12px;border-radius:12px;border:2px solid var(--soft);font-size:16px;margin:4px 0">`;}
+function parConta(){let h=`<div class="pad"><h1>Conta e família 🔗</h1>${nStatus()}${NF.code&&!N.fid?`<div class="hint">📨 Você recebeu um convite (código ${esc(NF.code)}). ${NF.hint==='k'?'Este deve ser o celular dela: use "Parear este celular".':'Crie a sua conta ou entre, e depois use "Entrar na família".'}</div>`:''}`;
+ if(!N.ses){h+=`<div class="card"><h3>Sou pai ou mãe</h3><p class="muted">Crie a sua conta (ou entre) com e-mail e senha. Use uma senha que só você saiba.</p>${nin('nEmail','seu e-mail',NF.em,'email')}${nin('nPass','senha (8 ou mais caracteres)','','password')}
+ <div class="row"><button class="btn small grow" onclick="nSign('up')">Criar conta</button><button class="btn sec small grow" onclick="nSign('in')">Entrar</button></div></div>
+ <div class="card"><h3>Este é o celular dela</h3><p class="muted">Peça ao pai ou à mãe o código de 6 caracteres, gerado em Conta → "Gerar código do aparelho dela". Vale 15 minutos. Não precisa de e-mail nem senha.</p>${nin('nCode','código',NF.code)}<button class="btn small" onclick="nJoin(true)">Parear este celular</button></div>`;}
+ else if(!N.fid){h+=`<div class="card"><h3>Criar a família</h3><p class="muted">Só um rótulo. Não coloque nome completo nem dados de saúde.</p>${nin('nFam','rótulo, ex.: Família',NF.fam)}${nin('nDispC','como você quer aparecer, ex.: Pai',NF.disp)}
+ <select id="nRole" style="width:100%;padding:12px;border-radius:12px;margin:4px 0"><option value="pai" ${NF.role==='pai'?'selected':''}>Sou o pai</option><option value="mae" ${NF.role==='mae'?'selected':''}>Sou a mãe</option><option value="responsavel" ${NF.role==='responsavel'?'selected':''}>Sou responsável</option></select><button class="btn small" onclick="nCreateFam()">Criar família</button></div>
+ <div class="card"><h3>Já existe uma família</h3><p class="muted">Use o código que um responsável gerou. A sua permissão vem do convite, e você só escolhe como aparecer.</p>${nin('nCode','código',NF.code)}${nin('nDispJ','como você quer aparecer (ex.: Mãe, Fono Ana)',NF.disp)}<button class="btn small" onclick="nJoin(false)">Entrar na família</button></div>
+ <button class="btn sec small" onclick="nLogout()">Sair da conta</button>`;}
+ else if(N.mode==='kid'){h+=`<div class="card"><h3>📱 Este celular é o aparelho dela</h3><p class="muted">Ele recebe as regras da família e envia o progresso, os check-ins e as provas. Último contato: ${esc(N.seen||'ainda não')}.</p><button class="btn sec small" onclick="nwrap(async function(){await nSync(true);NMSG='Sincronizado.';})">↻ Sincronizar agora</button>
+ <p class="muted">Dica: defina um PIN em Ajustes para ela não entrar na área dos pais.</p><button class="btn sec small" onclick="if(confirm('Desvincular este celular da família?'))nLogout()">Desvincular</button></div>`;}
+ else{h+=`<div class="card"><h3>👨‍👩‍👧 ${esc(ROLEN[N.role]||N.role)} · família conectada</h3><p class="muted">As regras que você muda em Ajustes sobem sozinhas. Se quiser forçar agora:</p><button class="btn sec small" onclick="nwrap(async function(){await nPublish(true);NMSG='Regras publicadas.';})">⬆ Publicar regras agora</button></div>
+ ${isG()?`<div class="card"><h3>Parear o celular dela</h3><p class="muted">Gere o código, abra o app no celular dela, vá em Conta e digite o código. Vale 15 minutos.</p><button class="btn small" onclick="nInvite('crianca')">Gerar código do aparelho dela</button>
+ <h3 style="margin-top:14px">Convidar outra pessoa</h3><select id="nIr" onchange="NF.irole=this.value" style="width:100%;padding:12px;border-radius:12px;margin:4px 0"><option value="mae" ${NF.irole==='mae'?'selected':''}>Mãe</option><option value="pai" ${NF.irole==='pai'?'selected':''}>Pai</option><option value="responsavel" ${NF.irole==='responsavel'?'selected':''}>Outro responsável</option><option value="terapeuta" ${NF.irole==='terapeuta'?'selected':''}>Terapeuta (só acompanha)</option><option value="escola" ${NF.irole==='escola'?'selected':''}>Escola (só acompanha)</option></select><button class="btn sec small" onclick="nInvite(NF.irole)">Gerar convite (vale 48 h)</button>
+ ${NINV?`<div class="card" style="background:var(--soft)"><p class="muted">Código para ${esc(ROLEN[NINV.role])} (vale ${NINV.role==='crianca'?'15 minutos':'48 horas'}):</p><div class="clock" style="font-size:44px">${esc(NINV.code)}</div><div class="row" style="margin-top:8px"><button class="btn small grow" onclick="nShare()">📤 Compartilhar convite</button><button class="btn sec small grow" onclick="nCopyInv()">📋 Copiar link</button></div></div>`:''}</div>`:''}
+ <div class="card"><h3>Quem está na família</h3>${REM.members.map(function(m){return `<div class="row" style="margin:6px 0"><div class="grow"><b>${esc(ROLEN[m.role]||m.role)}</b> <span class="muted">${esc(m.display||'')}${m.user_id===N.uid?' (você)':''}</span></div>${isG()&&m.user_id!==N.uid?`<button class="btn sec small" onclick="nRemove('${m.user_id}')">remover</button>`:''}</div>`;}).join('')||'<span class="muted">Carregando...</span>'}</div>
+ <button class="btn sec small" onclick="if(confirm('Sair da conta neste celular?'))nLogout()">Sair da conta</button>`;}
+ return h+`<div class="card muted" style="text-align:left">🔒 <b>O que sobe para a nuvem:</b> regras e rotina, progresso do dia, check-ins e provas (temporárias). <b>Não sobe:</b> PIN, vozes gravadas, nome completo, laudo ou diagnóstico.</div></div>`;}
+try{const sp=new URLSearchParams(location.search),cv=sp.get('convite');if(cv){NF.code=cv.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,12);NF.hint=sp.get('p')==='k'?'k':'a';S.pTab='conta';window.__convite=1;history.replaceState(null,'',location.pathname);}}catch(e){}
+
+nload();setInterval(nSync,20000);setTimeout(nSync,1500);
+load();vozLoadAll();if(window.__convite){S.view='kid';setView('par');}
 if('serviceWorker' in navigator&&/^https?:/.test(location.protocol)){navigator.serviceWorker.register('sw.js').catch(function(){});}
 render();
 setInterval(function(){const d=new Date();const hm=d.toTimeString().slice(0,5),key=d.toDateString();S.tasks.forEach(function(t){if(t.time===hm&&t.state==='todo'&&S.fired[t.id]!==key&&S.view==='kid'&&S.kid!=='task'){S.fired[t.id]=key;trigger(t.id);}});},15000);
