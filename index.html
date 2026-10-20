@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Meu Dia – Apoio Socioeducativo</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#6c4bff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Meu Dia">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<style>
+:root{--bg:#f3f0ff;--card:#fff;--ink:#241f45;--muted:#6d6892;--pri:#6c4bff;--pri-d:#4b2fd6;--sun:#ffb703;--ok:#22a06b;--soft:#e9e4ff;--warn:#fff4d6;--line:#ddd7f5}
+*{box-sizing:border-box}
+body{margin:0;background:#d9d3f5;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink)}
+#app{max-width:440px;margin:0 auto;min-height:100vh;background:var(--bg);position:relative;padding-bottom:84px}
+.top{position:sticky;top:0;z-index:5;background:var(--card);padding:8px;display:flex;gap:6px;border-bottom:1px solid var(--line)}
+.top button{flex:1;border:0;border-radius:12px;padding:10px 6px;font-weight:700;font-size:14px;background:var(--soft);color:var(--ink);cursor:pointer}
+.top button.on{background:var(--pri);color:#fff}
+.ribbon{background:var(--warn);color:#7a5600;font-size:12px;padding:6px 12px;text-align:center}
+.pad{padding:16px}
+h1{font-size:26px;margin:0}h2{font-size:19px;margin:18px 0 8px}h3{font-size:16px;margin:0 0 4px}
+p{line-height:1.45;margin:6px 0}.muted{color:var(--muted);font-size:14px}
+.card{background:var(--card);border-radius:20px;padding:14px;margin:10px 0;box-shadow:0 2px 10px rgba(80,60,160,.08)}
+.row{display:flex;align-items:center;gap:12px}.grow{flex:1}
+.spk{border:0;background:var(--soft);border-radius:50%;width:44px;height:44px;font-size:20px;cursor:pointer;flex:none}
+.btn{border:0;border-radius:16px;padding:14px 18px;font-size:17px;font-weight:800;background:var(--pri);color:#fff;cursor:pointer;width:100%}
+.btn.sec{background:var(--soft);color:var(--ink)}.btn.ok{background:var(--ok)}.btn.small{width:auto;padding:8px 12px;font-size:14px;border-radius:12px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.jar{display:flex;align-items:center;gap:14px}
+.jarbox{width:92px;height:116px;border:5px solid var(--pri);border-radius:18px 18px 30px 30px;position:relative;overflow:hidden;background:#fff;flex:none}
+.jarfill{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(#ffe08a,#ffb703);transition:height .6s}
+.jarstars{position:absolute;inset:4px;display:flex;flex-wrap:wrap;align-content:flex-end;justify-content:center;font-size:18px;line-height:1}
+.task{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:20px;padding:12px;margin:10px 0;box-shadow:0 2px 10px rgba(80,60,160,.08);cursor:pointer;border:3px solid transparent}
+.task.todo:hover{border-color:var(--pri)}
+.task .ic{font-size:44px;width:64px;height:64px;display:flex;align-items:center;justify-content:center;background:var(--soft);border-radius:18px;flex:none}
+.task .nm{font-weight:800;font-size:18px}
+.tag{font-size:13px;font-weight:700;padding:3px 10px;border-radius:99px;display:inline-block;margin-top:4px}
+.tag.todo{background:var(--soft)}.tag.wait{background:var(--warn);color:#7a5600}.tag.done{background:#d8f5e8;color:#0f6b44}
+.chip{font-size:13px;font-weight:700;color:var(--muted);margin-right:6px}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:440px;background:var(--card);border-top:1px solid var(--line);display:flex;padding:6px;gap:2px;z-index:6}
+.nav button{flex:1;border:0;background:none;padding:6px 0;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;border-radius:12px}
+.nav button span{display:block;font-size:23px}.nav button.on{background:var(--soft);color:var(--pri-d)}
+.stage{background:var(--card);border-radius:28px;padding:26px 14px;text-align:center;margin:12px 0}
+.big{font-size:110px;line-height:1;display:inline-block;padding:14px;border-radius:32px}
+.ring{box-shadow:0 0 0 6px var(--sun);animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 6px var(--sun)}50%{box-shadow:0 0 0 14px rgba(255,183,3,.35)}}
+.steptxt{font-size:24px;font-weight:800;margin-top:16px}
+.dots{display:flex;gap:8px;justify-content:center;margin:6px 0}.dots i{width:12px;height:12px;border-radius:50%;background:var(--line)}.dots i.on{background:var(--pri)}.dots i.cur{background:var(--sun);transform:scale(1.3)}
+.arrow{text-align:center;font-size:44px;animation:bounce 1s infinite;height:52px}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(10px)}}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile{background:var(--card);border:3px solid transparent;border-radius:22px;padding:14px 6px;text-align:center;font-weight:800;font-size:16px;cursor:pointer;box-shadow:0 2px 10px rgba(80,60,160,.08)}
+.tile:hover{border-color:var(--pri)}.tile .e{font-size:48px;display:block}
+.speakbar{background:var(--pri);color:#fff;border-radius:20px;padding:16px;font-size:22px;font-weight:800;text-align:center;margin-bottom:10px}
+.breath{width:180px;height:180px;border-radius:50%;background:radial-gradient(#cfe9ff,#9ad0ff);margin:24px auto;animation:breath 8s ease-in-out infinite;display:flex;align-items:center;justify-content:center;font-size:56px}
+@keyframes breath{0%,100%{transform:scale(.7)}50%{transform:scale(1.1)}}
+body.still *{animation:none!important}
+.seg{display:flex;gap:4px;flex-wrap:wrap}.seg button{flex:1;min-width:64px;border:0;border-radius:10px;padding:8px 4px;font-size:13px;font-weight:700;background:var(--soft);cursor:pointer;color:var(--ink)}
+.seg button.on{background:var(--pri);color:#fff}
+label.sw{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;font-weight:600}
+input[type=text],input[type=number],input[type=time],textarea,select{width:100%;border:2px solid var(--line);border-radius:12px;padding:10px;font-size:15px;font-family:inherit;background:#fff;color:var(--ink)}
+textarea{min-height:92px}
+details{background:var(--card);border-radius:16px;padding:10px 14px;margin:8px 0}summary{font-weight:700;cursor:pointer}
+.sug .st{font-size:13px;font-weight:700}
+.stat{display:flex;gap:10px}.stat .card{flex:1;text-align:center;margin:10px 0}.stat b{font-size:26px;display:block}
+.hint{background:var(--warn);border-radius:14px;padding:10px 12px;font-size:13px;color:#6b4a00;margin:10px 0}
+.puz{position:relative;width:120px;height:120px;display:flex;align-items:center;justify-content:center;font-size:84px;flex:none;border-radius:18px;overflow:hidden;background:var(--soft)}
+.puz .cv{position:absolute;inset:0;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr)}
+.puz .cv i{background:var(--pri);border:2px solid #fff;transition:opacity .6s}.puz .cv i.open{opacity:0}
+.pair{display:flex;align-items:center;justify-content:center;gap:14px}.pair .b{font-size:50px;text-align:center}.pair small{display:block;font-size:13px;font-weight:800;color:var(--muted)}.pair .ar{font-size:36px;color:var(--pri)}
+.lockbox{background:var(--warn);border-radius:20px;padding:12px;margin:10px 0}
+.alarm{text-align:center}.alarm h1{font-size:30px;margin-top:8px}
+.lib{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+.bar{height:16px;border-radius:99px;background:var(--soft);overflow:hidden;margin:10px 0}.bar i{display:block;height:100%;background:linear-gradient(90deg,#8fd3b6,var(--ok));transition:width .9s linear}
+.clock{font-size:64px;font-weight:800;text-align:center;letter-spacing:2px}
+.slots{display:flex;gap:8px;font-size:28px}.slots span{opacity:.25}.slots span.on{opacity:1}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const $=s=>document.querySelector(s);
+const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const q=x=>esc(JSON.stringify(x));
+const AREAS={rotina:'Rotina',casa:'Casa',escola:'Escola',tela:'Tempo de tela',comunicacao:'Comunicação'};
+const TASKAREAS=['rotina','casa','escola'];
+const LV=['N0 · Mediado','N1 · Acompanhado','N2 · Guiado','N3 · Autônomo'];
+const LVD=['Os pais operam; ela acompanha.','Ela usa com um adulto ao lado.','Ela faz sozinha e os pais aprovam.','Ela escolhe dentro dos limites definidos pelos pais.'];
+const CUR=['Pote com tema (estrelas, moedas ou diamantes)','Pontos','Moedas da família 🪙','Reais (R$)'];
+const DLG={passo:'Passo a passo em áudio',moderado:'Moderado',objetivo:'Objetivo'};
+const DLGD={passo:'Fala cada passo com número e orientação ("Passo 2 de 4... toque em Próximo"). Mais apoio.',moderado:'Fala só o que fazer em cada passo e dá um elogio curto no final.',objetivo:'Sem fala automática: ilustração e poucas palavras. O áudio só toca no botão 🔊.'};
+const DLGX={passo:'Passo 2 de 4. Colocar um pouquinho de pasta. Quando terminar, toque em Próximo.',moderado:'Colocar um pouquinho de pasta.',objetivo:'Colocar pasta.'};
+const LIB=[
+ {icon:'🍴',name:'Pôr a mesa',area:'casa',steps:[['🍽️','Pegar os pratos'],['🍴','Colocar os talheres ao lado do prato'],['🥤','Colocar os copos']]},
+ {icon:'🪴',name:'Regar as plantas',area:'casa',steps:[['🚰','Encher o regador'],['🪴','Regar a planta'],['✅','Guardar o regador']]},
+ {icon:'🐶',name:'Cuidar do bichinho',area:'casa',steps:[['🥣','Pegar a ração'],['🐶','Colocar no pote'],['💧','Trocar a água']]},
+ {icon:'🧺',name:'Dobrar as roupas',area:'casa',steps:[['👕','Pegar uma roupa'],['🤲','Dobrar ao meio'],['🗄️','Guardar na gaveta']]},
+ {icon:'🍽️',name:'Guardar a louça',area:'casa',steps:[['🍽️','Pegar a louça seca'],['🗄️','Guardar no armário']]}
+];
+let nid=20;
+let S={view:'kid',kid:'home',pTab:'hoje',step:0,cur:null,said:'',balance:3,lock:null,alarm:null,fired:{},open:{},
+ week:{gift:'🍨',name:'Sorvete ou açaí',done:3,total:9,counted:false},
+ month:{gift:'🎬',name:'Cinema',weeks:4,done:1},
+ play:{ready:30,running:false,ended:false,left:0,total:0,warned:{}},
+ cfg:{play:{min:30,warn5:true,warn1:true,sound:true,vol:0.15,demo:false},narr:true,rate:0.9,arrows:true,outline:true,still:false,fadeLast:false,cur:0,dlg:{g:'passo',rotina:'',casa:'',escola:''},auto:{rotina:1,casa:1,escola:1,tela:0,comunicacao:2},jar:'star',jarKid:true,useVoz:true,pin:''},
+ tasks:[
+  {id:7,icon:'🎒',name:'Arrumar-se para a escola',area:'escola',time:'06:45',block:false,reward:1,state:'todo',steps:[{icon:'👕',text:'Vestir o uniforme'},{icon:'🎒',text:'Conferir a mochila'},{icon:'🥪',text:'Pegar o lanche'},{icon:'💧',text:'Pegar a garrafa de água'}]},
+  {id:2,icon:'🪥',name:'Escovar os dentes',area:'rotina',time:'07:15',block:true,reward:1,state:'todo',steps:[{icon:'🪥',text:'Pegar a escova'},{icon:'🧴',text:'Colocar um pouquinho de pasta'},{icon:'😁',text:'Escovar por dois minutos'},{icon:'🚰',text:'Enxaguar a boca'}]},
+  {id:1,icon:'🛏️',name:'Arrumar a cama',area:'casa',time:'07:30',block:false,reward:1,state:'todo',steps:[{icon:'⏰',text:'Hora de acordar'},{icon:'🛏️',text:'Esticar o lençol'},{icon:'🧸',text:'Colocar o travesseiro no lugar'}]},
+  {id:4,icon:'🧽',name:'Lavar a louça',area:'casa',time:'13:30',block:false,reward:1,state:'todo',steps:[{icon:'🍽️',text:'Levar o prato até a pia'},{icon:'🚰',text:'Molhar o prato'},{icon:'🧽',text:'Passar a esponja com sabão'},{icon:'🚿',text:'Enxaguar bem'},{icon:'🧺',text:'Colocar para secar'}]},
+  {id:3,icon:'📚',name:'Tarefa da escola',area:'escola',time:'16:00',block:false,reward:2,state:'todo',steps:[{icon:'🎒',text:'Pegar o caderno'},{icon:'✏️',text:'Fazer a atividade do dia'},{icon:'✅',text:'Guardar o material'}]},
+  {id:5,icon:'🗑️',name:'Levar o lixo',area:'casa',time:'18:00',block:false,reward:1,state:'todo',steps:[{icon:'🗑️',text:'Pegar o saco de lixo da cozinha'},{icon:'🚪',text:'Levar até a lixeira'},{icon:'🛍️',text:'Colocar um saco novo'},{icon:'🧼',text:'Lavar as mãos'}]},
+  {id:6,icon:'👟',name:'Organizar roupas e calçados',area:'casa',time:'19:00',block:false,reward:1,state:'todo',steps:[{icon:'👕',text:'Separar as roupas sujas'},{icon:'🧺',text:'Colocar no cesto'},{icon:'👟',text:'Alinhar os calçados'},{icon:'🗄️',text:'Guardar as roupas limpas'}]}
+ ],
+ avisos:[{icon:'👟',text:'Amanhã tem educação física: levar o tênis.'},{icon:'🎨',text:'Sexta-feira: levar o material de arte.'}],
+ rewards:[{id:1,icon:'📺',name:'Tempo de celular (30 min)',cost:3,tela:true},{id:2,icon:'🎬',name:'Escolher o filme em casa',cost:4},{id:3,icon:'🎵',name:'Escolher as músicas do dia',cost:2},{id:4,icon:'📸',name:'Ver o álbum de fotos e vídeos',cost:3}],
+ pending:[],
+ sugg:[
+  {id:1,t:'Subir "Rotina" para N2 (guiado)',why:'Nos últimos dias ela concluiu a rotina da manhã com poucos apoios. No N2 ela faz sozinha e vocês só aprovam. Vocês podem voltar atrás quando quiserem. (Exemplo ilustrativo.)',s:'novo'},
+  {id:2,t:'Tirar a seta do último passo por uma semana',why:'Retirar os apoios aos poucos ajuda a ganhar independência sem frustração. Se ela hesitar, a seta volta. (Exemplo ilustrativo.)',s:'novo'},
+  {id:3,t:'Elogio específico hoje: "Gostei de como você guardou o caderno"',why:'Elogiar o que ela fez, com palavras exatas, ajuda a repetir o comportamento e a se sentir vista. (Exemplo ilustrativo.)',s:'novo'}
+ ]};
+const talk=[['💧','Quero beber água'],['🍎','Estou com fome'],['🚻','Preciso ir ao banheiro'],['🆘','Preciso de ajuda'],['😴','Quero descansar'],['📱','Quero o celular'],['🤗','Quero um abraço'],['🔊','Está muito barulho']];
+
+function speak(t){if(!('speechSynthesis' in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='pt-BR';u.rate=S.cfg.rate;speechSynthesis.speak(u);}
+function say(t,force,key){if(!t||(!S.cfg.narr&&!force))return;if(key&&S.cfg.useVoz!==false&&playVoz(key,t))return;speak(t);}
+function fmt(n){const c=S.cfg.cur;if(c==0)return n+' '+JT().e;if(c==1)return (n*10)+' pontos';if(c==2)return n+' 🪙';return 'R$ '+(n*0.5).toFixed(2).replace('.',',');}
+function fmtSay(n){const c=S.cfg.cur;if(c==0)return n+' '+(n==1?JT().one:JT().many);if(c==1)return (n*10)+' pontos';if(c==2)return n+(n==1?' moeda':' moedas');return (n*0.5).toFixed(2).replace('.',',')+' reais';}
+const T=id=>S.tasks.find(t=>t.id===id);
+const sortT=l=>l.slice().sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99'));
+function parseSteps(v){return v.split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{const i=l.indexOf(' ');const f=i>0?l.slice(0,i):'';if(f&&!/[A-Za-zÀ-ÿ0-9]/.test(f))return{icon:f,text:l.slice(i+1).trim()||'Fazer'};return{icon:'🔹',text:l};});}
+
+function prof(area){return S.cfg.dlg[area]||S.cfg.dlg.g;}
+function stepSay(t){const p=prof(t.area),st=t.steps[S.step],n=t.steps.length;
+ if(p==='passo')return 'Passo '+(S.step+1)+' de '+n+'. '+st.text+'. '+(S.step<n-1?'Quando terminar, toque em Próximo.':'Quando terminar, toque em Concluí.');
+ if(p==='moderado')return st.text+'.';
+ return '';}
+function doneSay(t,auto){const p=prof(t.area);
+ if(p==='passo')return 'Muito bem! Você concluiu '+t.name+'. '+(auto?'Você ganhou '+fmtSay(t.reward)+'.':'Seus pais vão ver e liberar o que você ganhou.');
+ if(p==='moderado')return 'Muito bem!';
+ return 'Pronto!';}
+function alarmSay(t){const p=prof(t.area);
+ if(p==='passo')return 'Está na hora de '+t.name+'. Vamos começar? Toque em Vamos.';
+ if(p==='moderado')return 'Hora de '+t.name+'.';
+ return t.name+'.';}
+function bump(){S.week.done=Math.min(S.week.total,S.week.done+1);if(S.week.done>=S.week.total&&!S.week.counted){S.week.counted=true;S.month.done=Math.min(S.month.weeks,S.month.done+1);}}
+let AC=null;
+function chime(n){if(!S.cfg.play.sound)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();const notes=n===2?[523,659,784]:[659,523];notes.forEach(function(f,i){const o=AC.createOscillator(),g=AC.createGain();o.type='sine';o.frequency.value=f;const t0=AC.currentTime+i*0.3;g.gain.setValueAtTime(0.0001,t0);g.gain.exponentialRampToValueAtTime(S.cfg.play.vol,t0+0.05);g.gain.exponentialRampToValueAtTime(0.0001,t0+0.7);o.connect(g);g.connect(AC.destination);o.start(t0);o.stop(t0+0.75);});}catch(e){}}
+function mmss(s){s=Math.max(0,Math.round(s));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');}
+function warnSay(m){const p=S.cfg.dlg.g;const u=m+(m==1?' minuto':' minutos');if(p==='passo')return 'Você está brincando. Faltam '+u+' para terminar.';if(p==='moderado')return 'Faltam '+u+'.';return '';}
+function endSay(){const p=S.cfg.dlg.g;if(p==='passo')return 'O tempo de brincar acabou. Foi muito bom! Vamos voltar?';if(p==='moderado')return 'O tempo de brincar acabou.';return '';}
+function startPlay(){const m=S.play.ready;if(!m)return;S.play={ready:0,running:true,ended:false,left:m*60,total:m*60,warned:{}};S.kid='play';chime(1);render();say(S.cfg.dlg.g==='objetivo'?'':'Pode ir brincar. Guarde o celular no bolso. Eu aviso quando estiver acabando.',0,'play_start');}
+function playTick(){const p=S.play;if(!p.running)return;p.left-=S.cfg.play.demo?30:1;const w=[];if(S.cfg.play.warn5)w.push(5);if(S.cfg.play.warn1)w.push(1);
+ w.forEach(function(m){if(p.left<=m*60&&p.left>0&&!p.warned[m]&&p.total>m*60){p.warned[m]=true;chime(1);say(warnSay(m),0,'warn'+m);}});
+ if(p.left<=0){p.left=0;p.running=false;p.ended=true;chime(2);say(endSay(),0,'play_end');}
+ if(S.view==='kid'&&(S.kid==='play'||S.kid==='home'))render();}
+function stopPlay(){S.play.running=false;S.play.ended=true;render();}
+function setMonth(k,v){if(k==='weeks')S.month.weeks=Math.max(2,Math.min(6,Number(v)||4));else S.month[k]=v;S.month.done=Math.min(S.month.done,S.month.weeks);render();}
+function setPlay(k,v){S.cfg.play[k]=v;render();}
+
+function setView(v){if(v==='kid')S.unl=false;if(v==='par'&&!S.unl){v='pin';}S.view=v;S.kid='home';S.alarm=null;if('speechSynthesis' in window)speechSynthesis.cancel();render();window.scrollTo(0,0);}
+function go(k){S.kid=k;S.said='';S.alarm=null;render();window.scrollTo(0,0);if(k==='calm')say('Vamos respirar. Puxe o ar devagar. Agora solte, bem devagar.');}
+function startTask(id){const t=T(id);if(!t||t.state!=='todo')return;S.alarm=null;S.cur=id;S.step=0;S.kid='task';render();say((prof(t.area)==='passo'?'Vamos começar: '+t.name+'. ':'')+stepSay(t));}
+function next(){const t=T(S.cur);if(S.step<t.steps.length-1){S.step++;render();say(stepSay(t));}else finish();}
+function finish(){const t=T(S.cur);const auto=S.cfg.auto[t.area]>=3;if(auto){t.state='done';S.balance+=t.reward;bump();}else{t.state='wait';S.pending.push({type:'tarefa',id:t.id});}if(S.lock===t.id)S.lock=null;S.kid='done';render();say(doneSay(t,auto));}
+function trigger(id){const t=T(id);if(!t||t.state!=='todo')return;S.view='kid';S.kid='alarm';S.alarm=id;if(t.block)S.lock=id;render();window.scrollTo(0,0);say(alarmSay(t));}
+function snooze(){const t=T(S.alarm);S.alarm=null;S.kid='home';render();say(t&&prof(t.area)==='passo'?'Tudo bem. Eu aviso de novo daqui a cinco minutos.':'');}
+function redeem(id){const r=S.rewards.find(x=>x.id===id);if(S.balance<r.cost)return;S.balance-=r.cost;if(r.tela&&S.cfg.auto.tela>=3){S.said='Liberado! Aproveite 📺';}else{S.pending.push({type:'troca',id:r.id});S.said='Pedido enviado aos pais 💛';}render();say(S.said.replace(/[^\p{L}\p{N}\s!,.]/gu,''));}
+function speakPhrase(p){S.said=p;render();say(p,true);}
+function approve(i){const p=S.pending[i];if(p.type==='tarefa'){const t=T(p.id);t.state='done';S.balance+=t.reward;bump();}S.pending.splice(i,1);render();}
+function decline(i){const p=S.pending[i];if(p.type==='tarefa'){T(p.id).state='todo';}else{S.balance+=S.rewards.find(x=>x.id===p.id).cost;}S.pending.splice(i,1);render();}
+function setCfg(k,v){S.cfg[k]=v;render();}
+function setDlg(k,v){S.cfg.dlg[k]=v;render();}
+function setAuto(a,l){S.cfg.auto[a]=l;render();}
+function upd(id,k,v){const t=T(id);if(k==='reward')t.reward=Math.max(0,Number(v)||0);else if(k==='steps')t.steps=parseSteps(v);else t[k]=v;render();}
+function addTask(){S.tasks.push({id:++nid,icon:'⭐',name:'Nova atividade',area:'casa',time:'',block:false,reward:1,state:'todo',steps:[{icon:'🔹',text:'Fazer a atividade'}]});render();}
+function addLib(i){const l=LIB[i];S.tasks.push({id:++nid,icon:l.icon,name:l.name,area:l.area,time:'',block:false,reward:1,state:'todo',steps:l.steps.map(s=>({icon:s[0],text:s[1]}))});render();}
+function delTask(id){S.tasks=S.tasks.filter(t=>t.id!==id);if(S.lock===id)S.lock=null;render();}
+function addAviso(){const i=$('#avIcon').value.trim()||'📢',t=$('#avText').value.trim();if(!t)return;S.avisos.push({icon:i,text:t});render();}
+function delAviso(i){S.avisos.splice(i,1);render();}
+function setWeek(k,v){if(k==='total')S.week.total=Math.max(3,Math.min(20,Number(v)||9));else S.week[k]=v;S.week.done=Math.min(S.week.done,S.week.total);render();}
+function sugg(id,ok){const s=S.sugg.find(x=>x.id===id);s.s=ok?'aceita':'depois';if(ok){if(id===1)S.cfg.auto.rotina=2;if(id===2)S.cfg.fadeLast=true;}render();}
+function resetDay(){S.play={ready:S.cfg.play.min,running:false,ended:false,left:0,total:0,warned:{}};S.tasks.forEach(t=>t.state='todo');S.pending=S.pending.filter(p=>p.type!=='tarefa');S.lock=null;S.fired={};render();}
+function resetWeek(){S.week.done=0;S.week.counted=false;render();}
+
+function topbar(){return `<div class="top"><button class="${S.view==='kid'?'on':''}" onclick="setView('kid')">👧 Visão dela</button><button class="${S.view==='par'?'on':''}" onclick="setView('par')">👨‍👩‍👧 Visão dos pais</button></div><div class="ribbon">Laboratório v0.5 · fica salvo neste aparelho · a IA aqui é simulada</div>`;}
+
+function kidNav(){const n=[['home','🏠','Meu dia'],['casa','🧹','Casa'],['escola','🎒','Escola'],['talk','💬','Falar'],['store','🎁','Loja'],['calm','🌿','Calma']];return `<div class="nav">${n.map(x=>`<button class="${S.kid===x[0]?'on':''}" onclick="go('${x[0]}')"><span>${x[1]}</span>${x[2]}</button>`).join('')}</div>`;}
+
+function taskCard(t){return `<div class="task ${t.state}" onclick="startTask(${t.id})"><div class="ic">${esc(t.icon)}</div><div class="grow"><div class="nm">${esc(t.name)}</div>${t.time?`<span class="chip">⏰ ${esc(t.time)}</span>`:''}<span class="tag ${t.state}">${t.state==='todo'?'▶ Vamos! +'+fmt(t.reward):t.state==='wait'?'⏳ Os pais vão ver':'✓ Feito'}</span></div><button class="spk" onclick="event.stopPropagation();say(${q(t.name)},1)">🔊</button></div>`;}
+
+function lockBanner(){if(!S.lock)return '';const t=T(S.lock);return `<div class="lockbox"><div class="pair"><div class="b">${esc(t.icon)}<small>Primeiro</small></div><div class="ar">➜</div><div class="b">📱<small>Depois</small></div></div><p style="text-align:center;font-weight:700;margin:6px 0 0">A tela de lazer volta quando você terminar: ${esc(t.name)}</p></div>`;}
+
+function puz(){const w=S.week,open=w.done>=w.total,n=Math.round(w.done/w.total*9);
+ const sayT=open?'Parabéns! Você ganhou: '+w.name+'.':'Sua meta da semana é '+w.name+'. Você já abriu '+w.done+' de '+w.total+' pedaços.';
+ return `<div class="card"><div class="row"><div class="puz">${esc(w.gift)}<div class="cv">${Array.from({length:9},(_,i)=>`<i class="${i<n?'open':''}"></i>`).join('')}</div></div><div class="grow"><h3>Meta da semana</h3><p style="font-weight:800;font-size:18px;margin:2px 0">${open?'🎁 Presente liberado!':esc(w.name)}</p><p class="muted">${open?esc(w.name):'Cada atividade abre um pedaço: '+w.done+' de '+w.total+'.'}</p></div><button class="spk" onclick="say(${q(sayT)},1)">🔊</button></div></div>`;}
+
+function monthCard(){const m=S.month,open=m.done>=m.weeks;const sayT=open?'Parabéns! Você ganhou o '+m.name+' do mês.':'Sua meta do mês é '+m.name+'. Você já completou '+m.done+' de '+m.weeks+' semanas.';
+ return `<div class="card"><div class="row"><div style="font-size:44px">${esc(m.gift)}</div><div class="grow"><h3>Meta do mês</h3><p style="font-weight:800;margin:2px 0">${open?'🎉 '+esc(m.name)+' liberado!':esc(m.name)}</p><div class="slots">${Array.from({length:m.weeks},(_,i)=>`<span class="${i<m.done?'on':''}">⭐</span>`).join('')}</div></div><button class="spk" onclick="say(${q(sayT)},1)">🔊</button></div></div>`;}
+
+function playCard(){const p=S.play;
+ if(p.running)return `<div class="card row"><div style="font-size:40px">🌳</div><div class="grow"><b>Brincando lá fora</b><div style="font-size:24px;font-weight:800">${mmss(p.left)}</div></div><button class="btn small" onclick="go('play')">Ver</button></div>`;
+ if(p.ready)return `<div class="card row"><div style="font-size:40px">🌳</div><div class="grow"><b>Hora de brincar</b><div class="muted">${p.ready} minutos · fora do celular</div></div><button class="btn small ok" onclick="startPlay()">Começar</button></div>`;
+ return '';}
+
+function kidPlay(){const p=S.play;const pct=p.total?Math.round(p.left/p.total*100):0;
+ if(p.ended){const nx=sortT(S.tasks.filter(t=>t.state==='todo'))[0];return `<div class="pad" style="text-align:center"><div style="font-size:90px;margin-top:20px">🌙</div><h1>O tempo de brincar acabou</h1><p style="font-size:19px">Foi muito bom brincar! 🙂 Vamos voltar?</p><button class="spk" style="width:60px;height:60px;font-size:28px" onclick="say(${q('O tempo de brincar acabou. Foi muito bom! Vamos voltar?')},1)">🔊</button>${nx?`<h2>Próxima atividade</h2>${taskCard(nx)}`:''}<button class="btn" style="margin-top:10px" onclick="S.play.ended=false;go('home')">Voltar ao meu dia</button></div>`;}
+ if(p.running)return `<div class="pad" style="text-align:center"><div style="font-size:70px;margin-top:10px">🌳</div><h1>Hora de brincar lá fora</h1><div class="clock">${mmss(p.left)}</div><div class="bar"><i style="width:${pct}%"></i></div><p class="muted">Pode guardar o celular no bolso. Eu aviso com um sonzinho antes de acabar.</p><button class="btn sec" onclick="stopPlay()">Terminar agora</button></div>`;
+ return `<div class="pad" style="text-align:center"><div style="font-size:70px;margin-top:20px">🌳</div><h1>Sem tempo de brincar agora</h1><p class="muted">Os pais liberam o próximo tempo de brincar.</p><button class="btn" onclick="go('home')">Voltar ao meu dia</button></div>`;}
+
+function kidHome(){const open=S.tasks.filter(t=>t.state==='todo').length;const stars=Math.min(S.balance,12);const pct=Math.min(S.balance/10,1)*100;
+ const greet='Bom dia! Hoje temos '+open+(open==1?' coisa':' coisas')+' para fazer. Você já tem '+fmtSay(S.balance)+'.';
+ return `<div class="pad"><div class="row"><h1 class="grow">Bom dia! ☀️</h1><button class="spk" onclick="say(${q(greet)},1)">🔊</button></div>
+ ${lockBanner()}
+ <div class="card jar"><div class="jarbox"><div class="jarfill" style="height:${pct}%"></div><div class="jarstars">${JT().e.repeat(stars)}</div></div><div><h3>Meu pote</h3><div style="font-size:26px;font-weight:800">${fmt(S.balance)}</div><p class="muted">Faça as atividades para encher o pote.</p>${S.cfg.jarKid?`<button class="btn sec small" style="width:auto" onclick="nextJar()">${JT().e} Trocar o pote</button>`:''}</div></div>
+ ${puz()}
+ ${monthCard()}${playCard()}<h2>O que vamos fazer hoje</h2>${sortT(S.tasks).map(taskCard).join('')}</div>`;}
+
+function kidArea(area,title,intro){const l=sortT(S.tasks.filter(t=>t.area===area));
+ return `<div class="pad"><div class="row"><h1 class="grow">${title}</h1><button class="spk" onclick="say(${q(intro)},1)">🔊</button></div>${lockBanner()}
+ ${area==='escola'?`<h2>Avisos da escola</h2>${S.avisos.length?S.avisos.map(a=>`<div class="card row"><div style="font-size:40px">${esc(a.icon)}</div><div class="grow" style="font-weight:700">${esc(a.text)}</div><button class="spk" onclick="say(${q(a.text)},1)">🔊</button></div>`).join(''):'<div class="card muted">Sem avisos por enquanto.</div>'}<h2>Minhas atividades</h2>`:''}
+ ${l.length?l.map(taskCard).join(''):'<div class="card muted">Nenhuma atividade aqui ainda.</div>'}</div>`;}
+
+function kidTask(){const t=T(S.cur),st=t.steps[S.step],last=S.step===t.steps.length-1;const showArrow=S.cfg.arrows&&!(S.cfg.fadeLast&&last);const p=prof(t.area);
+ return `<div class="pad"><div class="row"><button class="spk" onclick="go('home')">⬅️</button><div class="grow dots">${t.steps.map((_,i)=>`<i class="${i<S.step?'on':i===S.step?'cur':''}"></i>`).join('')}</div></div>
+ ${p==='passo'?`<div class="muted" style="text-align:center;font-weight:700">Passo ${S.step+1} de ${t.steps.length}</div>`:''}
+ <div class="stage"><div class="big ${S.cfg.outline?'ring':''}">${esc(st.icon)}</div><div class="steptxt">${esc(st.text)}</div><div style="margin-top:14px"><button class="spk" style="width:60px;height:60px;font-size:28px" onclick="say(${q(st.text)},1)">🔊</button></div></div>
+ ${showArrow?'<div class="arrow">⬇️</div>':'<div style="height:52px"></div>'}
+ <button class="btn ${last?'ok':''}" onclick="next()">${last?'Concluí! ✅':'Próximo ➜'}</button></div>`;}
+
+function kidAlarm(){const t=T(S.alarm);if(!t)return kidHome();
+ return `<div class="pad alarm"><div style="font-size:30px;margin-top:10px">⏰ ${esc(t.time||'')}</div><div class="stage"><div class="big ${S.cfg.outline?'ring':''}">${esc(t.icon)}</div><h1>Hora de ${esc(t.name.toLowerCase())}</h1><div style="margin-top:12px"><button class="spk" style="width:60px;height:60px;font-size:28px" onclick="say(${q(alarmSay(t))},1)">🔊</button></div></div>
+ ${t.block?`<div class="lockbox"><div class="pair"><div class="b">${esc(t.icon)}<small>Primeiro</small></div><div class="ar">➜</div><div class="b">📱<small>Depois</small></div></div></div>`:''}
+ <button class="btn" onclick="startTask(${t.id})">Vamos! ▶</button>
+ <div class="row" style="margin-top:10px"><button class="btn sec small grow" onclick="snooze()">Daqui a 5 minutos</button><button class="btn sec small grow" onclick="go('talk')">💬 Quero falar</button></div></div>`;}
+
+function kidDone(){const t=T(S.cur);return `<div class="pad" style="text-align:center"><div style="font-size:110px;margin-top:30px">🎉</div><h1>Muito bem!</h1><p style="font-size:20px">${t.state==='done'?'Você ganhou <b>'+fmt(t.reward)+'</b>':'Seus pais vão ver e liberar 💛'}</p>${S.lock===null&&t.block?'<p style="font-weight:700">📱 A tela voltou!</p>':''}<div class="stage"><div class="big">${esc(t.icon)}</div></div><button class="btn" onclick="go('home')">Voltar ao meu dia</button></div>`;}
+
+function kidStore(){
+ if(S.lock){const t=T(S.lock);return `<div class="pad"><h1>Loja 🎁</h1>${lockBanner()}<div class="card" style="text-align:center"><div style="font-size:70px">${esc(t.icon)}</div><p style="font-size:20px;font-weight:800">A loja abre depois de: ${esc(t.name)}</p><button class="btn" onclick="startTask(${t.id})">Vamos fazer agora ▶</button></div></div>`;}
+ return `<div class="pad"><div class="row"><h1 class="grow">Loja 🎁</h1><div style="font-weight:800;font-size:20px">${fmt(S.balance)}</div></div>${S.said?`<div class="speakbar">${esc(S.said)}</div>`:''}<p class="muted">Troque o que você ganhou por coisas legais.</p>
+ <div class="grid">${S.rewards.map(r=>`<div class="tile" style="cursor:default"><span class="e">${r.icon}</span>${esc(r.name)}<div style="margin:8px 0;color:var(--pri-d)">${fmt(r.cost)}</div><button class="btn small" ${S.balance<r.cost?'disabled':''} onclick="S.said='';redeem(${r.id})">Trocar</button></div>`).join('')}</div></div>`;}
+
+function kidTalk(){return `<div class="pad"><h1>Quero falar 💬</h1><p class="muted">Toque e o celular fala por você. Está sempre liberado.</p>${S.said?`<div class="speakbar">${esc(S.said)}</div>`:''}<div class="grid">${talk.map(x=>`<div class="tile" onclick="speakPhrase(${q(x[1])})"><span class="e">${x[0]}</span>${x[1]}</div>`).join('')}</div></div>`;}
+
+function kidCalm(){return `<div class="pad" style="text-align:center"><h1>Calma 🌿</h1><p style="font-size:20px">Puxe o ar devagar... e solte.</p><div class="breath">🌿</div><button class="btn sec" onclick="go('home')">Voltar</button></div>`;}
+
+function kidView(){const m={home:kidHome,casa:()=>kidArea('casa','Casa 🏠','Aqui estão as atividades de casa.'),escola:()=>kidArea('escola','Escola 🎒','Aqui estão os avisos e as atividades da escola.'),task:kidTask,alarm:kidAlarm,done:kidDone,store:kidStore,talk:kidTalk,calm:kidCalm,play:kidPlay};return m[S.kid]()+(['task','done','alarm'].includes(S.kid)?'':kidNav());}
+
+function parTabs(){const n=[['hoje','📋','Hoje'],['ajustes','⚙️','Ajustes'],['agente','🤖','Agente']];return `<div class="nav">${n.map(x=>`<button class="${S.pTab===x[0]?'on':''}" onclick="S.pTab='${x[0]}';render();window.scrollTo(0,0)"><span>${x[1]}</span>${x[2]}</button>`).join('')}</div>`;}
+
+function parHoje(){const done=S.tasks.filter(t=>t.state==='done').length;
+ return `<div class="pad"><h1>Painel dos pais</h1>
+ <div class="stat"><div class="card"><b>${done}/${S.tasks.length}</b><span class="muted">feitas hoje</span></div><div class="card"><b>${fmt(S.balance)}</b><span class="muted">no pote</span></div></div>
+ ${S.lock?`<div class="lockbox"><b>📱 Tela de lazer em pausa</b> até ela concluir "${esc(T(S.lock).name)}".<p><button class="btn sec small" onclick="S.lock=null;render()">Liberar a tela agora</button></p></div>`:''}
+ <h2>Aguardando vocês ${S.pending.length?'('+S.pending.length+')':''}</h2>
+ ${S.pending.length?S.pending.map((p,i)=>{const it=p.type==='tarefa'?T(p.id):S.rewards.find(x=>x.id===p.id);return `<div class="card"><div class="row"><div style="font-size:36px">${esc(it.icon)}</div><div class="grow"><h3>${p.type==='tarefa'?'Concluiu: ':'Quer trocar: '}${esc(it.name)}</h3><span class="muted">${p.type==='tarefa'?'Libera '+fmt(it.reward):'Custa '+fmt(it.cost)}</span></div></div><div class="row" style="margin-top:10px"><button class="btn ok small grow" onclick="approve(${i})">Aprovar 💛</button><button class="btn sec small grow" onclick="decline(${i})">Hoje não</button></div></div>`}).join(''):'<div class="card muted">Nada pendente. Na visão dela, conclua uma atividade para ver o fluxo.</div>'}
+ <h2>Próximos lembretes</h2>${sortT(S.tasks.filter(t=>t.time)).map(t=>`<div class="card row"><div style="font-size:30px">${esc(t.icon)}</div><div class="grow"><b>${esc(t.time)}</b> · ${esc(t.name)}${t.block?' <span class="muted">· tela em pausa até concluir</span>':''}</div><button class="btn sec small" onclick="trigger(${t.id})">Testar</button></div>`).join('')||'<div class="card muted">Nenhuma atividade com horário.</div>'}
+ <p class="muted">O lembrete toca sozinho no horário enquanto esta página estiver aberta na visão dela. Com o app instalado, ele chegaria com o celular bloqueado.</p>
+ <h2>Meta da semana</h2><div class="card"><p>${esc(S.week.gift)} <b>${esc(S.week.name)}</b>: ${S.week.done} de ${S.week.total} pedaços.</p><p>${esc(S.month.gift)} <b>${esc(S.month.name)}</b> do mês: ${S.month.done} de ${S.month.weeks} semanas.</p><button class="btn sec small" onclick="resetWeek()">↺ Reiniciar a semana</button></div>
+ <h2>Carta da semana (exemplo)</h2><div class="card"><p>🌟 <b>Vitórias:</b> a rotina da manhã foi concluída em 5 de 7 dias.</p><p>🌱 <b>Em crescimento:</b> o passo "enxaguar a boca" ainda pede a seta.</p><p>💡 <b>Para esta semana:</b> elogiar com palavras específicas, perto da hora da conquista.</p></div>
+ <button class="btn sec" onclick="resetDay()">↺ Reiniciar o dia (demonstração)</button></div>`;}
+
+function dlgSel(k){const v=S.cfg.dlg[k];return `<select onchange="setDlg('${k}',this.value)"><option value="" ${v===''?'selected':''}>Seguir o geral</option>${Object.keys(DLG).map(x=>`<option value="${x}" ${v===x?'selected':''}>${DLG[x]}</option>`).join('')}</select>`;}
+
+function parAjustes(){const c=S.cfg;
+ const sw=(k,l)=>`<label class="sw">${l}<input type="checkbox" ${c[k]?'checked':''} onchange="setCfg('${k}',this.checked)"></label>`;
+ return `<div class="pad"><h1>Ajustes</h1><p class="muted">Tudo aqui é editável e muda a visão dela na hora.</p>
+ <h2>Perfil de diálogo</h2><div class="card"><p class="muted">Como o app conversa com ela. Vale para todos os módulos, e cada um pode ter o seu.</p>
+ <div class="seg">${Object.keys(DLG).map(x=>`<button class="${c.dlg.g===x?'on':''}" onclick="setDlg('g','${x}')">${DLG[x]}</button>`).join('')}</div>
+ <p class="muted">${DLGD[c.dlg.g]}</p>
+ <p class="muted">Por módulo:</p>
+ <label class="sw">Rotina ${dlgSel('rotina')}</label><label class="sw">Casa ${dlgSel('casa')}</label><label class="sw">Escola ${dlgSel('escola')}</label>
+ <p class="muted">Ouvir exemplo ("Colocar pasta nos dentes"):</p><div class="seg">${Object.keys(DLG).map(x=>`<button onclick="say(${q(DLGX[x])},1)">🔊 ${DLG[x]}</button>`).join('')}</div></div>
+ <h2>Apoios didáticos</h2><div class="card">${sw('narr','🔊 Narração em áudio automática')}${sw('arrows','⬇️ Setas indicando o próximo passo')}${sw('outline','🟡 Contorno destacando a ilustração')}${sw('fadeLast','Retirar a seta no último passo')}${sw('still','Menos movimento (sensibilidade sensorial)')}
+ <label class="sw">Velocidade da voz<select onchange="setCfg('rate',Number(this.value))"><option value="0.7" ${c.rate==0.7?'selected':''}>Lenta</option><option value="0.9" ${c.rate==0.9?'selected':''}>Normal</option><option value="1.1" ${c.rate==1.1?'selected':''}>Rápida</option></select></label></div>
+ <h2>Valor da conquista</h2><div class="card"><p class="muted">Escolha o degrau que ela compreende hoje.</p><div class="seg">${CUR.map((x,i)=>`<button class="${c.cur===i?'on':''}" onclick="setCfg('cur',${i})">${x}</button>`).join('')}</div><p class="muted">Exemplo: "Escovar os dentes" vale ${fmt(1)}.</p></div>
+ <h2>Autonomia por área</h2>${Object.keys(AREAS).map(a=>`<div class="card"><h3>${AREAS[a]}</h3><div class="seg">${LV.map((x,i)=>`<button class="${c.auto[a]===i?'on':''}" onclick="setAuto('${a}',${i})">${x}</button>`).join('')}</div><p class="muted">${LVD[c.auto[a]]}</p></div>`).join('')}
+ <div class="hint">Em N0 a N2, o que ela conclui ou pede para trocar chega para a aprovação de vocês. Só no N3 é liberado na hora.</div>
+ <h2>Meta da semana</h2><div class="card"><p class="muted">Presente (emoji e nome) e quantos pedaços a ilustração tem.</p><p><input type="text" value="${esc(S.week.gift)}" maxlength="4" style="width:70px" onchange="setWeek('gift',this.value)"> <input type="text" value="${esc(S.week.name)}" style="width:calc(100% - 80px)" onchange="setWeek('name',this.value)"></p><p class="muted">Atividades necessárias na semana</p><input type="number" min="3" max="20" value="${S.week.total}" onchange="setWeek('total',this.value)"></div>
+ ${vozCard()}${joCard()}${bkCard()}
+ <h2>Meta do mês</h2><div class="card"><p class="muted">Cada semana concluída soma uma estrela do mês.</p><p><input type="text" value="${esc(S.month.gift)}" maxlength="4" style="width:70px" onchange="setMonth('gift',this.value)"> <input type="text" value="${esc(S.month.name)}" style="width:calc(100% - 80px)" onchange="setMonth('name',this.value)"></p><p class="muted">Semanas para completar</p><input type="number" min="2" max="6" value="${S.month.weeks}" onchange="setMonth('weeks',this.value)"></div>
+ <h2>Tempo de brincar</h2><div class="card"><p class="muted">Atividades físicas e brincadeiras fora do celular. O celular só avisa, com sons gentis e sem alarme. O tempo de celular é separado.</p><p class="muted">Duração de cada tempo (minutos)</p><input type="number" min="5" max="120" value="${c.play.min}" onchange="setPlay('min',Number(this.value)||30)">
+ <label class="sw">Avisar quando faltarem 5 minutos<input type="checkbox" ${c.play.warn5?'checked':''} onchange="setPlay('warn5',this.checked)"></label>
+ <label class="sw">Avisar quando faltar 1 minuto<input type="checkbox" ${c.play.warn1?'checked':''} onchange="setPlay('warn1',this.checked)"></label>
+ <label class="sw">Som de aviso<input type="checkbox" ${c.play.sound?'checked':''} onchange="setPlay('sound',this.checked)"></label>
+ <label class="sw">Volume do som<select onchange="setPlay('vol',Number(this.value))"><option value="0.08" ${c.play.vol==0.08?'selected':''}>Baixo</option><option value="0.15" ${c.play.vol==0.15?'selected':''}>Médio</option><option value="0.3" ${c.play.vol==0.3?'selected':''}>Alto</option></select></label>
+ <label class="sw">Demonstração rápida (tempo acelerado)<input type="checkbox" ${c.play.demo?'checked':''} onchange="setPlay('demo',this.checked)"></label>
+ <p><button class="btn sec small" onclick="S.play.ready=S.cfg.play.min;render()">Liberar um tempo de brincar agora</button> <button class="btn sec small" onclick="chime(1);say('Faltam 5 minutos para terminar de brincar.',1)">🔊 Ouvir o aviso</button></p></div>
+ <h2>Avisos da escola</h2><div class="card">${S.avisos.map((a,i)=>`<div class="row" style="margin-bottom:8px"><div style="font-size:30px">${esc(a.icon)}</div><div class="grow">${esc(a.text)}</div><button class="btn sec small" onclick="delAviso(${i})">Remover</button></div>`).join('')}
+ <p><input type="text" id="avIcon" placeholder="📢" maxlength="4" style="width:70px"> <input type="text" id="avText" placeholder="Novo aviso" style="width:calc(100% - 80px)"></p><button class="btn sec small" onclick="addAviso()">+ Adicionar aviso</button></div>
+ <h2>Atividades</h2>${S.tasks.map(t=>`<details ${S.open[t.id]?'open':''} ontoggle="S.open[${t.id}]=this.open"><summary>${esc(t.icon)} ${esc(t.name)} <span class="muted">· ${AREAS[t.area]}${t.time?' · '+esc(t.time):''}</span></summary>
+ <p><input type="text" value="${esc(t.icon)}" maxlength="4" style="width:70px" onchange="upd(${t.id},'icon',this.value)"> <input type="text" value="${esc(t.name)}" style="width:calc(100% - 80px)" onchange="upd(${t.id},'name',this.value)"></p>
+ <p class="muted">Módulo</p><select onchange="upd(${t.id},'area',this.value)">${TASKAREAS.map(a=>`<option value="${a}" ${t.area===a?'selected':''}>${AREAS[a]}</option>`).join('')}</select>
+ <p class="muted">Horário do lembrete</p><input type="time" value="${esc(t.time||'')}" onchange="upd(${t.id},'time',this.value)">
+ <label class="sw">Pausar a tela de lazer até concluir<input type="checkbox" ${t.block?'checked':''} onchange="upd(${t.id},'block',this.checked)"></label>
+ <p class="muted">Recompensa (em estrelas-base)</p><input type="number" min="0" value="${t.reward}" onchange="upd(${t.id},'reward',this.value)">
+ <p class="muted">Passos (um por linha; comece com um emoji se quiser)</p><textarea onchange="upd(${t.id},'steps',this.value)">${esc(t.steps.map(s=>s.icon+' '+s.text).join('\n'))}</textarea>
+ <p><button class="btn sec small" onclick="trigger(${t.id})">⏰ Testar lembrete</button> <button class="btn sec small" onclick="delTask(${t.id})">Remover</button></p></details>`).join('')}
+ <h2>Biblioteca de atividades de casa</h2><div class="lib">${LIB.map((l,i)=>`<button class="btn sec small" onclick="addLib(${i})">+ ${esc(l.icon)} ${esc(l.name)}</button>`).join('')}</div>
+ <button class="btn" style="margin-top:10px" onclick="addTask()">+ Nova atividade em branco</button></div>`;}
+
+function parAgente(){return `<div class="pad"><h1>Agente 🤖</h1><p class="muted">Sugestões a partir da rotina. São observações para apoiar vocês e não substituem a avaliação de profissionais.</p>
+ ${S.sugg.map(s=>`<div class="card sug"><h3>${esc(s.t)}</h3><details><summary>Por que o agente sugere isso?</summary><p>${esc(s.why)}</p><button class="btn sec small" onclick="say(${q(s.why)},1)">🔊 Ouvir</button></details>
+ ${s.s==='novo'?`<div class="row" style="margin-top:8px"><button class="btn ok small grow" onclick="sugg(${s.id},1)">Aceitar</button><button class="btn sec small grow" onclick="sugg(${s.id},0)">Agora não</button></div>`:`<p class="st">${s.s==='aceita'?'✅ Aceita e aplicada nos ajustes':'⏸️ Deixada para depois'}</p>`}</div>`).join('')}
+ <h2>Aprendendo juntos (exemplo)</h2><div class="card"><h3>3 minutos: o que a recusa pode estar comunicando</h3><p>Quando ela recusa uma atividade, pode estar dizendo "está difícil", "estou cansada" ou "não entendi". Vale tentar dividir em passos menores e oferecer uma escolha.</p><button class="btn sec small" onclick="say('Quando ela recusa uma atividade, pode estar dizendo que está difícil, que está cansada, ou que não entendeu. Vale tentar dividir em passos menores e oferecer uma escolha.',1)">🔊 Ouvir a lição</button></div>
+ <h2>Conversa para conhecer a família</h2><div class="card"><p>Na próxima etapa, vocês respondem em áudio a perguntas guiadas e o agente monta um perfil vivo, que só vira regra depois da confirmação de vocês.</p><button class="btn sec small" disabled>Em breve</button></div></div>`;}
+
+function parView(){const m={hoje:parHoje,ajustes:parAjustes,agente:parAgente};return m[S.pTab]()+parTabs();}
+function render(){document.body.className=S.cfg.still?'still':'';$('#app').innerHTML=topbar()+(S.view==='kid'?kidView():(S.view==='pin'?pinScreen():parView()));if(Date.now()-lastSave>1500)save();}
+
+/* ===== v0.5: fundação (salvar no aparelho, PIN, cópia de segurança, pote com temas, voz dos pais) ===== */
+const JARS={star:{e:'⭐',one:'estrela',many:'estrelas',nome:'Estrelas'},coin:{e:'🪙',one:'moeda',many:'moedas',nome:'Moedas'},gem:{e:'💎',one:'diamante',many:'diamantes',nome:'Diamantes'}};
+function JT(){return JARS[S.cfg.jar]||JARS.star;}
+function setJar(k){S.cfg.jar=k;render();}
+function nextJar(){const ks=Object.keys(JARS);S.cfg.jar=ks[(ks.indexOf(S.cfg.jar)+1)%ks.length];render();say('Agora o pote é de '+JT().many+'.');}
+function joCard(){return `<h2>Pote de conquistas</h2><div class="card"><p class="muted">Muda só o desenho e o som. O valor é o mesmo: uma conquista vale um item. Vale quando a unidade de valor é o pote com tema.</p>
+ <div class="seg">${Object.keys(JARS).map(k=>`<button class="${S.cfg.jar===k?'on':''}" onclick="setJar('${k}')">${JARS[k].e} ${JARS[k].nome}</button>`).join('')}</div>
+ <label class="sw">Ela pode trocar o tema<input type="checkbox" ${S.cfg.jarKid?'checked':''} onchange="S.cfg.jarKid=this.checked;render()"></label></div>`;}
+/* salvar no aparelho */
+const KEY='apoio_v05',PERSIST=['balance','week','month','cfg','tasks','avisos','rewards','pending','sugg','fired','play'];
+let lastSave=0;
+function save(){lastSave=Date.now();try{const o={day:new Date().toDateString()};PERSIST.forEach(k=>o[k]=S[k]);localStorage.setItem(KEY,JSON.stringify(o));}catch(e){}}
+function mergeCfg(d,s){const r=Object.assign({},d);for(const k in s){r[k]=(s[k]&&typeof s[k]==='object'&&!Array.isArray(s[k])&&d[k]&&typeof d[k]==='object')?Object.assign({},d[k],s[k]):s[k];}return r;}
+function applyState(o,newDay){PERSIST.forEach(k=>{if(o[k]!==undefined)S[k]=(k==='cfg')?mergeCfg(S.cfg,o.cfg):o[k];});
+ S.play.running=false;S.play.ended=false;
+ nid=Math.max(nid,...S.tasks.map(t=>t.id||0))+1;
+ if(newDay){S.tasks.forEach(t=>t.state='todo');S.pending=S.pending.filter(p=>p.type!=='tarefa');S.fired={};S.lock=null;S.play={ready:S.cfg.play.min,running:false,ended:false,left:0,total:0,warned:{}};}}
+function load(){try{const o=JSON.parse(localStorage.getItem(KEY)||'null');if(!o)return;applyState(o,o.day!==new Date().toDateString());}catch(e){}}
+document.addEventListener('visibilitychange',function(){if(document.hidden)save();});
+window.addEventListener('pagehide',save);
+/* PIN dos pais */
+function pinScreen(){const has=!!S.cfg.pin;return `<div class="pad" style="text-align:center"><div style="font-size:70px;margin-top:20px">🔒</div><h1>Área dos pais</h1>
+ <p class="muted">${has?'Digite o PIN de 4 números.':'Crie um PIN de 4 números para esta área. Ele é uma barreira simples, não um cofre.'}</p>
+ <p><input id="pinIn" type="password" inputmode="numeric" maxlength="4" autocomplete="off" style="font-size:28px;text-align:center;width:150px;letter-spacing:8px;padding:10px;border-radius:14px;border:2px solid var(--line)"></p>
+ ${S.pinMsg?`<p style="color:#b42318;font-weight:700">${esc(S.pinMsg)}</p>`:''}
+ <button class="btn" onclick="pinOk()">${has?'Entrar':'Criar PIN e entrar'}</button>
+ ${has?'':'<p></p><button class="btn sec" onclick="S.unl=true;S.pinMsg=\'\';setView(\'par\')">Agora não (só para testar)</button>'}
+ <p></p><button class="btn sec" onclick="setView('kid')">Voltar para a visão dela</button></div>`;}
+function pinOk(){const v=(document.querySelector('#pinIn').value||'').trim();if(!/^\d{4}$/.test(v)){S.pinMsg='Use 4 números.';render();return;}
+ if(!S.cfg.pin){S.cfg.pin=v;S.unl=true;S.pinMsg='';setView('par');return;}
+ if(v===S.cfg.pin){S.unl=true;S.pinMsg='';setView('par');}else{S.pinMsg='PIN incorreto.';render();}}
+/* cópia de segurança */
+function expCode(){const o={};PERSIST.forEach(k=>o[k]=S[k]);return btoa(unescape(encodeURIComponent(JSON.stringify(o))));}
+function bkGen(){const c=expCode();S.bk=c;S.bkMsg='Código gerado. Copie e guarde, ou mande para o outro aparelho.';try{navigator.clipboard.writeText(c).then(function(){S.bkMsg='Código copiado. Cole no outro aparelho em "Importar".';render();}).catch(function(){S.bkMsg='Não consegui copiar sozinho. Selecione o código na caixa e copie.';render();});}catch(e){}render();}
+function bkImp(){const t=(document.querySelector('#bkIn').value||'').trim();try{const o=JSON.parse(decodeURIComponent(escape(atob(t))));applyState(o,false);S.bkMsg='Importado com sucesso.';save();}catch(e){S.bkMsg='Código inválido.';}render();}
+function resetAll(){if(!S.resetArm){S.resetArm=true;render();return;}try{localStorage.removeItem(KEY);}catch(e){}location.reload();}
+function bkCard(){return `<h2>Segurança dos dados</h2><div class="card"><p class="muted">Tudo fica salvo só neste aparelho. Se limpar os dados do navegador ou desinstalar, perde. As vozes gravadas não entram no código.</p>
+ <div class="row"><button class="btn sec small grow" onclick="bkGen()">Gerar código de cópia</button><button class="btn sec small grow" onclick="S.cfg.pin='';S.unl=false;setView('kid')">Trocar o PIN</button></div>
+ <p><textarea id="bkIn" rows="3" style="width:100%;border-radius:12px;border:2px solid var(--line);padding:8px;font-size:12px" placeholder="Cole aqui o código para importar">${esc(S.bk||'')}</textarea></p>
+ <button class="btn sec small" onclick="bkImp()">Importar este código</button>${S.bkMsg?`<p class="muted">${esc(S.bkMsg)}</p>`:''}
+ <p></p><button class="btn small" style="background:#b42318" onclick="resetAll()">${S.resetArm?'Toque de novo para apagar tudo':'Começar do zero'}</button></div>`;}
+/* voz dos pais */
+const VF=[{k:'play_start',t:'Pode ir brincar. Guarde o celular no bolso. Eu aviso quando estiver acabando.'},{k:'warn5',t:'Faltam 5 minutos para terminar de brincar.'},{k:'warn1',t:'Falta 1 minuto para terminar.'},{k:'play_end',t:'O tempo de brincar acabou. Foi muito bom! Vamos voltar?'}];
+const VOZ={};let idb=null,REC=null,CUR_AUDIO=null;
+function idbOpen(){return new Promise(function(res){try{const r=indexedDB.open('apoio-voz',1);r.onupgradeneeded=function(){r.result.createObjectStore('voz');};r.onsuccess=function(){idb=r.result;res(idb);};r.onerror=function(){res(null);};}catch(e){res(null);}});}
+function vozLoadAll(){idbOpen().then(function(db){if(!db)return;try{const rq=db.transaction('voz').objectStore('voz').openCursor();rq.onsuccess=function(){const c=rq.result;if(c){VOZ[c.key]=c.value;c.continue();}else render();};}catch(e){}});}
+function vozPut(k,v){VOZ[k]=v;if(!idb)return;try{idb.transaction('voz','readwrite').objectStore('voz').put(v,k);}catch(e){}}
+function vozDel(k){delete VOZ[k];if(idb){try{idb.transaction('voz','readwrite').objectStore('voz').delete(k);}catch(e){}}render();}
+function playVoz(k,fallbackText){const v=VOZ[k];if(!v)return false;try{if(CUR_AUDIO){CUR_AUDIO.pause();}if('speechSynthesis' in window)speechSynthesis.cancel();const a=new Audio(URL.createObjectURL(new Blob([v.buf],{type:v.type})));CUR_AUDIO=a;const p=a.play();if(p&&p.catch)p.catch(function(){if(fallbackText)speak(fallbackText);});return true;}catch(e){return false;}}
+function vozRec(k){if(REC){recStop();return;}
+ if(!navigator.mediaDevices||!window.MediaRecorder){S.vozMsg='Este aparelho não grava áudio por aqui.';render();return;}
+ navigator.mediaDevices.getUserMedia({audio:true}).then(function(st){const ch=[];const mr=new MediaRecorder(st);REC={k:k,mr:mr,st:st};
+  mr.ondataavailable=function(e){if(e.data&&e.data.size)ch.push(e.data);};
+  mr.onstop=function(){st.getTracks().forEach(t=>t.stop());const type=mr.mimeType||'audio/mp4';const b=new Blob(ch,{type:type});b.arrayBuffer().then(function(buf){vozPut(k,{buf:buf,type:type});REC=null;S.vozMsg='Gravado. Toque em ▶ para ouvir.';render();});};
+  mr.start();S.vozMsg='Gravando... fale perto do microfone e toque em ⏹ para parar.';render();}).catch(function(){S.vozMsg='Sem permissão para o microfone. Libere nas permissões do navegador.';render();});}
+function recStop(){if(REC&&REC.mr&&REC.mr.state!=='inactive')REC.mr.stop();}
+function vozCard(){return `<h2>Voz dos pais</h2><div class="card"><p class="muted">Grave as frases com a sua voz. Quando existir gravação, o app usa a sua voz. Sem gravação, usa a voz do aparelho.</p>
+ <label class="sw">Usar a voz dos pais<input type="checkbox" ${S.cfg.useVoz!==false?'checked':''} onchange="S.cfg.useVoz=this.checked;render()"></label>
+ ${VF.map(f=>`<div class="card" style="margin:8px 0"><p style="margin:0 0 6px">${esc(f.t)}</p><div class="row">
+  <button class="btn small ${REC&&REC.k===f.k?'':'sec'}" style="width:auto" onclick="vozRec('${f.k}')">${REC&&REC.k===f.k?'⏹ Parar':'🎙️ Gravar'}</button>
+  ${VOZ[f.k]?`<button class="btn sec small" style="width:auto" onclick="playVoz('${f.k}')">▶ Ouvir</button><button class="btn sec small" style="width:auto" onclick="vozDel('${f.k}')">🗑️</button><span class="muted">gravado</span>`:'<span class="muted">sem gravação</span>'}</div></div>`).join('')}
+ ${S.vozMsg?`<p class="muted">${esc(S.vozMsg)}</p>`:''}</div>`;}
+load();vozLoadAll();
+if('serviceWorker' in navigator&&/^https?:/.test(location.protocol)){navigator.serviceWorker.register('sw.js').catch(function(){});}
+render();
+setInterval(function(){const d=new Date();const hm=d.toTimeString().slice(0,5),key=d.toDateString();S.tasks.forEach(function(t){if(t.time===hm&&t.state==='todo'&&S.fired[t.id]!==key&&S.view==='kid'&&S.kid!=='task'){S.fired[t.id]=key;trigger(t.id);}});},15000);
+setInterval(playTick,1000);
+</script>
+</body>
+</html>
